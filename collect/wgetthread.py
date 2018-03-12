@@ -8,27 +8,29 @@ def coords(roi):
 # Threaded wget database fetcher class
 class wgetthread(Thread):
     # Initialise thread
-    def __init__(self, cfg, product):
+    def __init__(self, cfg, paths, product):
         Thread.__init__(self)
-        self.cfg   = cfg
-        self.product    = product
+        self.cfg     = cfg
+        self.paths   = paths
+        self.product = product
     
     # Run thread
     def run(self):
         # Get relevant cfg variables
-        cfg = self.cfg
-        product  = self.product
+        cfg     = self.cfg
+        paths   = self.paths
+        product = self.product
 
         year     = cfg['year']
         month    = cfg['month']
         ROI      = cfg['ROI']
-        
-        wgetpath = cfg['wgetpath']
-        datapath = cfg['datapath']
         baseurl  = cfg['baseurl']
         
         username = cfg['username']
         password = cfg['password']
+        
+        wgetpath = paths['wget']
+        datapath = paths['data']
         
 
         # Construct URL

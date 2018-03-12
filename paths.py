@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import os
-from collect.cfg import *
+
+# Initialise paths dictionary
+paths = {}
 
 # Define relative paths
 # N.B. Relative to proba-v-data-collector.py
@@ -10,15 +12,15 @@ wgetrelpath = '/../../wget/wget'    # Points to wget executable (Windows only)
 
 # Construct common paths
 repopath = os.path.dirname(__file__)
-cfg['datapath'] = os.path.realpath(repopath + datarelpath)
+paths['data'] = os.path.realpath(repopath + datarelpath)
 
 # Construct specific paths
 if os.name == "nt":
     # Construct absolute paths from current file path
     wgetpath = os.path.realpath(repopath + wgetrelpath) # Points to wget executable in Windows
-    cfg['wgetpath'] = wgetpath
+    paths['wget'] = wgetpath
     
 elif os.name == "posix":
     # Define relative paths (N.B. Relative to proba-v-data-collector.py)
     wgetpath = 'wget'                       # Points to wget command in Linux
-    cfg['wgetpath'] = wgetpath
+    paths['wget'] = wgetpath
