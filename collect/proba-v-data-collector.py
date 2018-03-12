@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from settings import *
+from cfg import *
 from credentials import *
 from wgetthread import *
 
@@ -7,8 +7,8 @@ from wgetthread import *
 threads = []
 
 # Start wget threads
-for product in settings['products']:
-    th = wgetthread(settings, product)
+for product in cfg['products']:
+    th = wgetthread(cfg, product)
     threads.append(th)
     th.start()
 
