@@ -6,8 +6,8 @@ paths = {}
 
 # Define relative paths
 # N.B. Relative to proba-v-data-collector.py
-datarelpath = '/../../data'         # Points to data folder
-wgetrelpath = '/../../wget/wget'    # Points to wget executable (Windows only)
+datarelpath = '/../data'         # Points to data folder
+wgetrelpath = '/../wget/wget'    # Points to wget executable (Windows only)
 # Note: As wget is usually installed by default on Linux distros, it is assumed this command is present. specos.py deals with platform specific cases such as these.
 
 # Construct common paths

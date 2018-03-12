@@ -1,15 +1,10 @@
 #!/usr/bin/env python3
 
 # Check if the file is loaded as a submodule, by trying to import paths
-try:
-    from paths import *
-except:
-    print("\nThis tools package is setup as a structure of submodules. Therefore, you should run this script in the following manner: 'python3 -m collect.collect'\n")
-    raise
-
-from collect.cfg import *
-from collect.credentials import *
-from collect.wgetthread import *
+from paths import *
+from collect_cfg import *
+from collect_credentials import *
+from collect_wgetthread import *
 
 # Initialise thread collection
 threads = []
