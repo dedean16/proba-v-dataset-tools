@@ -35,4 +35,4 @@ class wgetthread(Thread):
         url = baseurl + product + str(year) + '/' + str(month) + '/?coord=' + coords(ROI)
         
         # Fetch data using wget
-        call([wgetpath, '-r', '--user=' + username, '--password=' + password, '-P' + datapath, '-nH', '-q', '--show-progress',  url])
+        call([wgetpath, '-r', '--user=' + username, '--password=' + password, '-P' + datapath, '-nH', '-q', '--show-progress', '--reject=*index.html*,/image/',  url])
