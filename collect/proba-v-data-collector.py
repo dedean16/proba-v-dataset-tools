@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-from cfg import *
-from credentials import *
-from wgetthread import *
+from .cfg import *
+from paths import *
+from .credentials import *
+from .wgetthread import *
 
 # Initialise thread collection
 threads = []
