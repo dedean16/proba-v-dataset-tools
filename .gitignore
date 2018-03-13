@@ -1,0 +1,5 @@
+# Credentials file (contains PDF username and password)
+*credentials.py
+
+# Python compiler cache
+**/__pycache__/**
