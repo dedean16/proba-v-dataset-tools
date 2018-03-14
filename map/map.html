@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id="canvas" width="1024" height="512"></canvas>
+
+<script>
+    // A crude and for now simple way of layering the images automatically
+    // on top of each other, while at the same time, allowing for more
+    // complex interactions in the future. If stuff does get more
+    // advanced in the future, the layers will probably have to be drawn
+    // in a better way (like not writing a block of code for each layer).
+    // For now, it will do.
+    var context = document.getElementById('canvas').getContext("2d");
+    
+    // Load basemap image
+    var basemap = new Image();
+    basemap.src = "img/equirectmap-1024-bw.jpg";
+    
+    basemap.onload = function() {
+        context.drawImage(basemap, 0, 0);
+    }
+    
+    // Load layer1 image
+    var layer1  = new Image();
+    layer1.src  = "img/maplayer1.png";
+    
+    layer1.onload = function() {
+        context.drawImage(layer1, 0, 0);
+    }
+        
+</script>
+
+</body>
+</html>

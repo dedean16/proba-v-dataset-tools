@@ -20,11 +20,8 @@ def mapper(coordlist, paths):
         y2 = int(maplat(coord[3]))
         
         # Draw rectangle
-        draw.rectangle((x1, y1, x2, y2), fill=(0, 0, 255, 75))
+        draw.rectangle((x1, y1, x2, y2), fill=(0, 0, 255, 128))
         
-    img.save('testmap.png', 'PNG')
+    img.save('map/img/maplayer1.png', 'PNG')
         
     return
-    
-    
-    
