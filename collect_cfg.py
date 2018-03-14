@@ -9,10 +9,10 @@ cfg['month']   = 8                 # Month of interest
 
 # Define Region of Interest Coordinates
 ROI = {}
-ROI['xll']     = 44.8              # X Lower Left
-ROI['yll']     = 19.7              # Y Lower Left
-ROI['xur']     = 45.2              # X Upper Right
-ROI['yur']     = 20.0              # Y Upper Right
+ROI['xll']     = -97.75            # X Lower Left
+ROI['yll']     =  41.93            # Y Lower Left
+ROI['xur']     = -97.32            # X Upper Right
+ROI['yur']     =  42.19            # Y Upper Right
 cfg['ROI']     = ROI
 
 # Product URLs
