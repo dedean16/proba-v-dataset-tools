@@ -3,3 +3,7 @@
 
 # Python compiler cache
 **/__pycache__/**
+
+# Generated map images
+/map/img/**
+!/map/img/equirectmap-1024-bw.jpg
