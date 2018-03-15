@@ -7,3 +7,6 @@
 # Generated map images
 /map/img/**
 !/map/img/equirectmap-1024-bw.jpg
+
+# Wget logs
+wget-log*
