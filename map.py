@@ -5,4 +5,5 @@ from map_writer import *
 
 from map_cfg import *
 
-mapper(coordlister(paths, mapcfg), paths, mapcfg)
+coordlist = coordlister(paths, mapcfg)
+mapper(coordlist, paths, mapcfg)

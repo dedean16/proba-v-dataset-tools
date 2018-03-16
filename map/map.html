@@ -2,7 +2,7 @@
 <html>
 <body>
 
-<canvas id="canvas" width="1024" height="512"></canvas>
+<canvas id="canvas" width="1600" height="800"></canvas>
 
 <script>
     // A crude and for now simple way of layering the images automatically
@@ -15,7 +15,7 @@
     
     // Load basemap image
     var basemap = new Image();
-    basemap.src = "img/equirectmap-1024-bw.jpg";
+    basemap.src = "img/equirectmap-bw.jpg";
     
     basemap.onload = function() {
         context.drawImage(basemap, 0, 0);
