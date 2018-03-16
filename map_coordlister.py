@@ -4,17 +4,28 @@ import glob
 import h5py
 
 # Function that returns a list of unique coordinates contained in the database
-def coordlister(paths):
+def coordlister(paths, mapcfg):
     # Construct HDF5 database iterator
     pattern = os.path.join(paths['data'], '**/*.[Hh][Dd][Ff]5')
     it = glob.iglob(pattern, recursive = True)
 
     # Initialise coordinate list
-    coordlist = []
+    ROIdata = []
     
     # Iterate over all HDF5 files
     for filepath in it:
         with h5py.File(filepath, 'r') as f:
+            
+            # Determine product by matching product list items against filepath string
+            for product in mapcfg['products']:
+                if product in filepath:
+                    break
+                
+            else:
+                # Product not found
+                product = ''
+            
+            iprod = mapcfg['products'].index(product)
             
             # Read min/max longitude/lattitude
             lon1 = f['lon'][0]
@@ -22,9 +33,12 @@ def coordlister(paths):
             lat1 = f['lat'][0]
             lat2 = f['lat'][-1]
             
-            # Add coordinates to list if unique
+            # Construct ROI info
             coord = (lon1, lon2, lat1, lat2)
-            if not(coord in coordlist):
-                coordlist.append(coord)
+            ROI = {'coord': coord, 'iprod':iprod}
+            
+            # Add ROI data if unique
+            if not(ROI in ROIdata):
+                ROIdata.append(ROI)        # Add to ROIdata
         
-    return coordlist
+    return ROIdata
