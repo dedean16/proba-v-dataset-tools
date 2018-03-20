@@ -1,34 +1,93 @@
 <!DOCTYPE html>
 <html>
+
+<header>
+    <title>PROBA-V Local Database</title>
+     <meta charset="UTF-8">
+</header>
+
+<style>
+    #layercheckboxes {
+		display: -webkit-flex; 			/* Safari */
+		display: flex;
+        /* border: 1px solid red; */
+        flex-wrap: wrap;
+    }
+    
+    #layercheckboxes div {
+        /* border: 1px solid black; */
+    }
+</style>
+
 <body>
 
 <canvas id="canvas" width="1600" height="800"></canvas>
+<div id="layercheckboxes"></div>
+
+<script src="map.js"></script>
 
 <script>
-    // A crude and for now simple way of layering the images automatically
-    // on top of each other, while at the same time, allowing for more
-    // complex interactions in the future. If stuff does get more
-    // advanced in the future, the layers will probably have to be drawn
-    // in a better way (like not writing a block of code for each layer).
-    // For now, it will do.
-    var context = document.getElementById('canvas').getContext("2d");
+    "use strict";
+    //=== Parameters ===//
+    var basesrc  = 'img/equirectmap-bw.jpg';    // Source of base layer
+    var layersrc = 'img/maplayer';              // Source of layer (without number)
+    var layerext = '.png';                      // Layer file extension
     
-    // Load basemap image
-    var basemap = new Image();
-    basemap.src = "img/equirectmap-bw.jpg";
+    // Easy ID access
+    function id(id) { return document.getElementById(id); }
     
-    basemap.onload = function() {
-        context.drawImage(basemap, 0, 0);
+    // Load images, given source
+    function loadimg(imgs, src) {
+        var img = new Image();                  // Initialise new image
+        img.src = src;                          // Set image source
+        img.showlayer = true;                   // Initialise layer as enabled
+        imgs.push(img);                         // Add image to list
     }
     
-    // Load layer1 image
-    var layer1  = new Image();
-    layer1.src  = "img/maplayer1.png";
-    
-    layer1.onload = function() {
-        context.drawImage(layer1, 0, 0);
+    // Draw all enabled image layers
+    function draw(ctx, imgs) {
+        for (var i = 0; i < nlayers; i++) {
+            var img = imgs[i];
+            
+            if (img.showlayer) {                // If layer is enabled
+                ctx.drawImage(img, 0, 0);       // Draw image
+            }
+        }
     }
+    
+    function toggle(i) {
+        imgs[i].showlayer = !imgs[i].showlayer; // Toggle layer
+        draw(ctx, imgs);
+    }
+    
+    var nlayers = products.length + 1;           // Number of marked layers (not base layer)
+    
+    // Initialise and load images
+    var imgs = [];
+    loadimg(imgs, basesrc);
         
+    for (var i = 0; i < nlayers; i++) {
+        var src = layersrc + i + layerext;
+        loadimg(imgs, src);
+    }
+    
+    // Add canvas element and
+    var ctx = id('canvas').getContext("2d");
+    
+    // Add checkboxes for each layer
+    var html = '';
+    for (var i = 1; i < nlayers; i++) {
+        html = html + "<div><label>\
+        <input type='checkbox' oninput = 'toggle("+i+");' checked>\
+        <b>Layer " + i + ": </b>" + products[i-1] + "&nbsp;&nbsp;&nbsp;\
+        </label></div>";
+    }
+    
+    id('layercheckboxes').innerHTML = html;
+    
+    // Draw images
+    draw(ctx, imgs);
+
 </script>
 
 </body>

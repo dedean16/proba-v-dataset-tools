@@ -2,15 +2,16 @@
 from PIL import Image, ImageDraw
 from scipy.interpolate import interp1d
 
+# Mark regions in layers and write to image files
 def mapper(ROIdata, paths, mapcfg):
     
     # Read resolution from basemap image
     imsize = Image.open(mapcfg['basemap']).size
     print("\nUsing basemap resolution: {}x{}.".format(*imsize))
     
-    # Initialise image
-    img = Image.new('RGBA', imsize)
-    draw = ImageDraw.Draw(img)
+    # Initialise image layers
+    npr  = len(mapcfg['products'])
+    imgs = [Image.new('RGBA', imsize) for i in range(npr)]
     
     # Construct linear earth to pixel coordinate mapper
     maplon = interp1d([-180, 180], [0, imsize[0]-1])
@@ -32,7 +33,8 @@ def mapper(ROIdata, paths, mapcfg):
         r,g,b,a = mapcfg['colors'][iprod]
         
         # Draw rectangle
-        draw.rectangle((x1, y1, x2, y2),\
+        ImageDraw.Draw(imgs[iprod]).rectangle(\
+                        (x1, y1, x2, y2),\
                         fill = (r, g, b, a),\
                         outline = mapcfg['outlinecolor'])
         
@@ -41,8 +43,11 @@ def mapper(ROIdata, paths, mapcfg):
         # instead of blending according to the alpha channels.
         # In future versions this might need to be fixed.
         
-    # Write image file to disk
-    img.save('map/img/maplayer1.png', 'PNG')
-    print("Done marking {} product regions on map.".format(len(ROIdata)))
+    # Write image files to disk
+    for i in range(npr):
+        img = imgs[i]
+        img.save('map/img/maplayer{}.png'.format(i), 'PNG')
+        
+    print("Done marking {} regions on {} layers.".format(len(ROIdata), npr))
         
     return

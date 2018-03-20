@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
+# Map configuration
 
 mapcfg={}               # Initialise map configuration
 
-mapcfg['products'] = ['PROBA-V_100m/S1_TOC_100_m_C1/',\
-                      'PROBA-V_300m/S1_TOC_-_300_m_C1/',\
-                      'PROBA-V_300m/L2A_-_300_m_C1/',\
-                      'PROBA-V_100m/L2A_-_100_m_C1/']
+mapcfg['products'] = ['S1_TOC_100_m_C1', 'S1_TOC_-_300_m_C1',\
+                      'L2A_-_300_m_C1', 'L2A_-_100_m_C1']
 
 # Define map colors RGBA
-a = 128                 # Alpha channel (transparency)
+a =  96                 # Alpha channel (transparency)
 b = 196                 # Alpha channel (transparency) of outline
 
 mapcfg['colors'] = [[  0,   0, 192, a],\

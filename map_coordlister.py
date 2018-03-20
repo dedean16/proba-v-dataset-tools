@@ -3,7 +3,7 @@ import os
 import glob
 import h5py
 
-# Function that returns a list of unique coordinates contained in the database
+# Return a list of unique coordinates contained in the database
 def coordlister(paths, mapcfg):
     # Construct HDF5 database iterator
     pattern = os.path.join(paths['data'], '**/*.[Hh][Dd][Ff]5')
