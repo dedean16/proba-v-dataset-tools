@@ -11,3 +11,6 @@
 
 # Wget logs
 wget-log*
+
+# numpy data files
+*.npy
