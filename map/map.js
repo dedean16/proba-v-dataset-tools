@@ -1,1 +1,0 @@
-var products = ['L2A_-_300_m_C1', 'L2A_-_100_m_C1', 'S1_TOC_100_m_C1', 'S1_TOC_-_300_m_C1'];
