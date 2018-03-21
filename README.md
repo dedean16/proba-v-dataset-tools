@@ -10,3 +10,8 @@ PROBA-V Python Data Tool collection for testing Super Resolution algorithms on P
 - `[SR]:` The Super Resolution algorithm(s).
 - `[DELTA]` Measure for differences in the multiple frames used for the Super Resolution algorithm.
 - `[METRIC]` Quality metric of the SR algorithm performance.
+
+## Requirements
+- Python 3
+- Python libraries: h5py, numpy, scipy
+- wget
