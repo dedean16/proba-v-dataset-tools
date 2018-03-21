@@ -3,7 +3,7 @@ from PIL import Image, ImageDraw
 from scipy.interpolate import interp1d
 
 # Mark regions in layers and write to image files
-def mapper(ROIdata, paths, mapcfg):
+def mapper(uniROIdata, paths, mapcfg):
     
     # Read resolution from basemap image
     imsize = Image.open(mapcfg['basemap']).size
@@ -17,7 +17,7 @@ def mapper(ROIdata, paths, mapcfg):
     maplon = interp1d([-180, 180], [0, imsize[0]-1])
     maplat = interp1d([ -90,  90], [imsize[1]-1, 0])
     
-    for ROI in ROIdata:
+    for ROI in uniROIdata:
         
         # Unpack ROI info
         coord = ROI['coord']
@@ -48,6 +48,6 @@ def mapper(ROIdata, paths, mapcfg):
         img = imgs[i]
         img.save('map/img/maplayer{}.png'.format(i), 'PNG')
         
-    print("Done marking {} regions on {} layers.".format(len(ROIdata), npr))
+    print("Done marking {} regions on {} layers.".format(len(uniROIdata), npr))
         
     return

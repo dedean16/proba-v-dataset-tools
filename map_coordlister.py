@@ -10,7 +10,8 @@ def coordlister(paths, mapcfg):
     it = glob.iglob(pattern, recursive = True)
 
     # Initialise coordinate list
-    ROIdata = []
+    uniROIdata = []
+    allROIdata = []
     
     # Iterate over all HDF5 files
     for filepath in it:
@@ -35,10 +36,16 @@ def coordlister(paths, mapcfg):
             
             # Construct ROI info
             coord = (lon1, lon2, lat1, lat2)
-            ROI = {'coord': coord, 'iprod':iprod}
+            ROI = {
+                'coord':    coord,
+                'iprod':    iprod,
+                'filepath': filepath
+            }
+            
+            allROIdata.append(ROI)
             
             # Add ROI data if unique
-            if not(ROI in ROIdata):
-                ROIdata.append(ROI)        # Add to ROIdata
+            if not(ROI in uniROIdata):
+                uniROIdata.append(ROI)        # Add to ROIdata
         
-    return ROIdata
+    return allROIdata, uniROIdata
