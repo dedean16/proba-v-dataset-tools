@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import numpy as np
 
 from paths import *
@@ -13,5 +14,7 @@ genjs(mapcfg)                                       # Generate javascript
 mapper(uniROIdata, paths, mapcfg)                   # Mark regions in layers
 
 # Write ROI data to file
-np.save(mapcfg['ROIfilename'], allROIdata)
-print("Saved {} ROI entries to file '{}'.".format(len(allROIdata), mapcfg['ROIfilename']))
+filename = mapcfg['ROIfilename']                    # File name
+np.save(filename, allROIdata)                       # Save file
+filesize = int(os.path.getsize(filename) / 1000)    # File size (KB) rounded
+print("Saved {} ROI entries to file '{}' ({} KB).\n".format(len(allROIdata), filename, filesize))
