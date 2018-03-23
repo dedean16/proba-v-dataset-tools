@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-# Check if the file is loaded as a submodule, by trying to import paths
 from paths import *
 from collect_cfg import *
 from collect_credentials import *
