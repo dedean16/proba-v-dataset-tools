@@ -65,7 +65,6 @@ class wgetthread(Thread):
         
         # Fetch data using wget
         call([wgetpath, '-r', '--user=' + username, '--password=' + password, '-P' + datapath, '-nH', '-q', '-c', '--reject=*index.html*,*.tiff',  url])
-        # call([wgetpath, '-r', '--user=' + username, '--password=' + password, '-P' + datapath, '-nH', '-nv', '-owget-log-{}.txt'.format(get_ident()), '--reject=*index.html*,*.tiff',  url])
 
 
 # Threaded status terminal output
@@ -93,19 +92,15 @@ class wgetstatus(Thread):
             Dmin = int(Dtotsec / 60)
             Dsec = int(Dtotsec - Dmin * 60)
             
-            # Count number of lines in wget log
-            # with open('wget-log.txt', 'r') as f:
-            #     nlines = f.read().count('\n')
-            
             # Count number of active threads
             nth = active_count()
             
+            # Calculate data folder size and accumulated size since start
             dirsize  = get_dirsize(paths['data'])
             downsize = dirsize - startsize
             
             # Write terminal output
             sys.stdout.write('\r{} min {} sec  Threads: {}  Downloaded: {}  Data folder: {}   '.format(Dmin, Dsec, nth, sizestr(downsize), sizestr(dirsize)))
-            # sys.stdout.write('\rTime elapsed: {} min {} sec  Active threads: {}  Log lines: {}   '.format(Dmin, Dsec, nth, nlines))
             sys.stdout.flush()
             
             # Check if wget threads have finished
