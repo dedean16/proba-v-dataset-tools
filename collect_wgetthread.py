@@ -1,8 +1,35 @@
+import os
+import sys
+from time import time, sleep
 from subprocess import call
-from threading import Thread
+from threading import active_count, Thread, get_ident
 
-# Coordinate argument constructor - builds URL coords argument
-def coords(roi):
+# Get total size of a folder
+def get_dirsize(start_path):
+    total_size = 0
+    for dirpath, dirnames, filenames in os.walk(start_path):
+        for f in filenames:
+            fp = os.path.join(dirpath, f)
+            total_size += os.path.getsize(fp)
+    return total_size
+
+
+# Print file size as rounded string in B, KB, MB, GB or TB
+def sizestr(sizebytes):
+    if sizebytes < 10**3:
+        return '{}B'.format(sizebytes)
+    elif sizebytes < 10**6:
+        return '{}KB'.format(round(sizebytes/10**3))
+    elif sizebytes < 10**9:
+        return '{}MB'.format(round(sizebytes/10**6))
+    elif sizebytes < 10**12:
+        return '{}GB'.format(round(sizebytes/10**9))
+    else:
+        return '{}TB'.format(round(sizebytes/10**12))
+
+
+# Coordinate argument constructor - builds URL coordstr argument
+def coordstr(roi):
     return str(roi['xll']) +','+ str(roi['yll']) +','+ str(roi['xur']) +','+ str(roi['yur'])
 
 # Threaded wget database fetcher class
@@ -34,7 +61,60 @@ class wgetthread(Thread):
         
 
         # Construct URL
-        url = baseurl + product + str(year) + '/' + str(month) + '/?coord=' + coords(ROI)
+        url = baseurl + product + str(year) + '/' + str(month) + '/?coord=' + coordstr(ROI)
         
         # Fetch data using wget
-        call([wgetpath, '-r', '--user=' + username, '--password=' + password, '-P' + datapath, '-nH', '-q', '--show-progress', '--reject=*index.html*,*.tiff',  url])
+        call([wgetpath, '-r', '--user=' + username, '--password=' + password, '-P' + datapath, '-nH', '-q', '-c', '--reject=*index.html*,*.tiff',  url])
+        # call([wgetpath, '-r', '--user=' + username, '--password=' + password, '-P' + datapath, '-nH', '-nv', '-owget-log-{}.txt'.format(get_ident()), '--reject=*index.html*,*.tiff',  url])
+
+
+# Threaded status terminal output
+class wgetstatus(Thread):
+    # Initialise thread
+    def __init__(self, paths):
+        Thread.__init__(self)
+        self.paths = paths
+    
+    # Run thread
+    def run(self):
+        paths = self.paths
+        
+        # print('For detailed output, see wget-log.txt.')
+        
+        wgetdone   = False             # Break if this gets True
+        starttime  = time()            # Start time of process
+        startsize  = get_dirsize(paths['data']) # Start size of data folder
+        
+        # Output status of wget until all wget threads are done
+        while True:
+            
+            # Calculate time elapsed
+            Dtotsec = time() - starttime
+            Dmin = int(Dtotsec / 60)
+            Dsec = int(Dtotsec - Dmin * 60)
+            
+            # Count number of lines in wget log
+            # with open('wget-log.txt', 'r') as f:
+            #     nlines = f.read().count('\n')
+            
+            # Count number of active threads
+            nth = active_count()
+            
+            dirsize  = get_dirsize(paths['data'])
+            downsize = dirsize - startsize
+            
+            # Write terminal output
+            sys.stdout.write('\r{} min {} sec  Threads: {}  Downloaded: {}  Data folder: {}   '.format(Dmin, Dsec, nth, sizestr(downsize), sizestr(dirsize)))
+            # sys.stdout.write('\rTime elapsed: {} min {} sec  Active threads: {}  Log lines: {}   '.format(Dmin, Dsec, nth, nlines))
+            sys.stdout.flush()
+            
+            # Check if wget threads have finished
+            # (if so, only 2 threads should be left in total)
+            wgetactive = (nth > 2)
+            if wgetdone: break
+            
+            # Sleep till next iteration
+            sleep(10)
+            
+            
+        print('\n')

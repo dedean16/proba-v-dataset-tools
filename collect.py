@@ -14,6 +14,11 @@ for product in cfg['products']:
     threads.append(th)
     th.start()
 
+# Monitor wget status
+status = wgetstatus(paths)
+threads.append(status)
+status.start()
+
 # Wait for all threads to finish
 for th in threads:
     th.join()
