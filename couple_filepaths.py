@@ -31,6 +31,6 @@ def couplepaths(coords, mapcfg):
         nempty += (len(filepaths) == 0)     # Count coordinates without files
         CC[c] = { 'coord':TC,  'filepaths':filepaths } # Add to coupled coordinate list
         
-    print("\n{} out of {} target coordinates outside local database.\n".format(nempty, len(CC)))
+    print("\n{} out of {} target coordinates not in local database.\n".format(nempty, len(CC)))
     
     return CC
