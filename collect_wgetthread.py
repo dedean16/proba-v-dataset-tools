@@ -64,7 +64,7 @@ class wgetthread(Thread):
         url = baseurl + product + str(year) + '/' + str(month) + '/?coord=' + coordstr(ROI)
         
         # Fetch data using wget
-        call([wgetpath, '-r', '--user=' + username, '--password=' + password, '-P' + datapath, '-nH', '-q', '--reject=*index.html*,*.tiff',  url])
+        call([wgetpath, '-r', '--user=' + username, '--password=' + password, '-P' + datapath, '-nH', '-q', '--reject=*.html*,*.tiff,*.png,*.pdf',  url])
 
 
 # Threaded status terminal output
