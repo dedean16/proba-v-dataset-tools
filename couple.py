@@ -20,6 +20,7 @@ for C in CC:
     for filepath in filepaths:
         with h5py.File(filepath, 'r') as f:
             ind = couple_indexer(f, coord, couplecfg)
+            print(ind)
             couple_writer(f, ind, couplecfg)
             
         # Retrieve data from selected chunk
