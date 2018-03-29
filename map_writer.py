@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from PIL import Image, ImageDraw
-from scipy.interpolate import interp1d
+from extra_math import linefunc
 
 # Mark regions in layers and write to image files
 def mapper(uniROIdata, paths, mapcfg):
@@ -14,8 +14,8 @@ def mapper(uniROIdata, paths, mapcfg):
     imgs = [Image.new('RGBA', imsize) for i in range(npr)]
     
     # Construct linear earth to pixel coordinate mapper
-    maplon = interp1d([-180, 180], [0, imsize[0]-1])
-    maplat = interp1d([ -90,  90], [imsize[1]-1, 0])
+    maplon = linefunc(-180, 180, 0, imsize[0]-1)
+    maplat = linefunc( -90,  90, imsize[1]-1, 0)
     
     for ROI in uniROIdata:
         
