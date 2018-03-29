@@ -4,28 +4,7 @@ from time import time, sleep
 from subprocess import call
 from threading import active_count, Thread, get_ident
 
-# Get total size of a folder
-def get_dirsize(start_path):
-    total_size = 0
-    for dirpath, dirnames, filenames in os.walk(start_path):
-        for f in filenames:
-            fp = os.path.join(dirpath, f)
-            total_size += os.path.getsize(fp)
-    return total_size
-
-
-# Print file size as rounded string in B, KB, MB, GB or TB
-def sizestr(sizebytes):
-    if sizebytes < 10**3:
-        return '{}B'.format(sizebytes)
-    elif sizebytes < 10**6:
-        return '{}KB'.format(round(sizebytes/10**3))
-    elif sizebytes < 10**9:
-        return '{}MB'.format(round(sizebytes/10**6))
-    elif sizebytes < 10**12:
-        return '{}GB'.format(round(sizebytes/10**9))
-    else:
-        return '{}TB'.format(round(sizebytes/10**12))
+from custom_functions import *
 
 
 # Coordinate argument constructor - builds URL coordstr argument
