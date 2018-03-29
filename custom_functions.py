@@ -15,14 +15,14 @@ def get_dirsize(start_path):
 
 
 # Print file size as rounded string in B, KB, MB, GB or TB
-def sizestr(sizebytes):
+def sizestr(sizebytes, sep=''):
     if sizebytes < 10**3:
-        return '{}B'.format(sizebytes)
+        return '{}{}B'.format(sizebytes, sep)
     elif sizebytes < 10**6:
-        return '{}KB'.format(round(sizebytes/10**3))
+        return '{}{}KB'.format(round(sizebytes/10**3), sep)
     elif sizebytes < 10**9:
-        return '{}MB'.format(round(sizebytes/10**6))
+        return '{}{}MB'.format(round(sizebytes/10**6), sep)
     elif sizebytes < 10**12:
-        return '{}GB'.format(round(sizebytes/10**9))
+        return '{}{}GB'.format(round(sizebytes/10**9), sep)
     else:
-        return '{}TB'.format(round(sizebytes/10**12))
+        return '{}{}TB'.format(round(sizebytes/10**12), sep)
