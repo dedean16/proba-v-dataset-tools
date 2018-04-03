@@ -1,6 +1,39 @@
 #!/usr/bin/env python3
 
-def couple_writer(f, ind, couplecfg):
+import os
+import numpy as np
+from libtiff import TIFF
+
+def couple_writer(tile, cnt, jx, jy, ch, level, coord):
+    
+    # Convert to unsigned 16bit integer
+    utile = tile.astype('uint16')
+    
+    #==========================================================#
+    # Normalize image
+    # We shouldn't be doing this in the final run, but it makes
+    # it a lot easier to actually read the images, as the maxima
+    # of most images are well below the maximum of 2^16
+    utile = (utile * (2**16 / np.max(utile))).astype('uint16')
+    #==========================================================#
+    
+    # Construct path string
+    pathstr = 'slices/{}_{}_{}{}'.format(coord[0], coord[1], jx, jy)
+    filestr = '{}-{}-{}.tiff'.format(cnt, level, ch)
+    
+    # Create folder if it doesn't exist yet
+    if not os.path.exists(pathstr):
+        os.makedirs(pathstr)
+    
+    # Open image file and write
+    tiff = TIFF.open('{}/{}'.format(pathstr, filestr), mode='w')
+    tiff.write_image(utile)
+    tiff.close()
+
+
+#### Multithreading
+
+def couple_slicer(f, ind, couplecfg, cnt, coord):
     
     # Determine level type
     try:
@@ -9,4 +42,19 @@ def couple_writer(f, ind, couplecfg):
     except:
         level = 'LEVEL3'
     
+    ixs, iys = ind                # Unpack calculated image indices
+    
+    # Loop over indices, over channels
+    for jx in range(len(ixs)-1):
+        for jy in range(len(iys)-1):
+            for ch in couplecfg['channels']:
+                for fullimg in f[level+'/RADIOMETRY/'+ch].items():
+                    # This will contain only one item, named either TOA or TOC
+                    
+                    # Extract tile as numpy array
+                    tile = fullimg[1][ iys[jx]:iys[jx+1], ixs[jx]:ixs[jx+1] ]
+                    
+                    # Ignore empty images
+                    if np.max(tile) > -1:
+                        couple_writer(tile, cnt, jx, jy, ch, level, coord)
     return

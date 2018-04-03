@@ -22,7 +22,7 @@ def couple_indexer(f, coord, couplecfg):
     # Several image tiles can be extracted from a single location
     
     # Fetch tiling configuration variables
-    ch = couplecfg['chunksize']
+    ch  = couplecfg['chunksize']
     ntx = couplecfg['ntilesx']
     nty = couplecfg['ntilesy']
     
@@ -30,8 +30,19 @@ def couple_indexer(f, coord, couplecfg):
     startlon = coord[1] - (ntx * ch) / 2
     startlat = coord[0] - (nty * ch) / 2
     
-    # Calculate tile corner pixel coordinates
-    xs = [int(lon2x( startlon + tx*ch )) for tx in range(ntx)]
-    ys = [int(lat2y( startlat + ty*ch )) for ty in range(nty)]
+    # Calculate tile corner pixel coordinates, and sort
+    ixs= [int(lon2x( startlon + tx*ch )) for tx in range(ntx)]
+    iys= [int(lat2y( startlat + ty*ch )) for ty in range(nty)]
     
-    return (xs, ys)
+    # Indices can become negative if the target coordinate
+    # is at the boundary of the satellite image.
+    # Remove negative indices and out of bound indices:
+    ixs = list(filter(lambda x: x>=0 and x<nlon, ixs))
+    iys = list(filter(lambda y: y>=0 and y<nlat, iys))
+    
+    # Sort coordinate lists
+    ixs.sort()
+    iys.sort()
+    
+    # Return pixel coordinate lists
+    return (ixs, iys)

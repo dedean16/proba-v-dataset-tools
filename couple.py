@@ -9,7 +9,9 @@ from couple_filepaths import *
 from couple_indexer import *
 from couple_writer import *
 
-CC = couplepaths(coords, mapcfg)
+CC, npaths = couplepaths(coords, mapcfg)
+
+cnt = 0
 
 for C in CC:
     
@@ -20,8 +22,10 @@ for C in CC:
     for filepath in filepaths:
         with h5py.File(filepath, 'r') as f:
             ind = couple_indexer(f, coord, couplecfg)
-            print(ind)
-            couple_writer(f, ind, couplecfg)
+            couple_slicer(f, ind, couplecfg, cnt, coord)
+            
+            cnt += 1
+            print('{}/{} files processed'.format(cnt, npaths))
             
         # Retrieve data from selected chunk
         # Write data as image file, with unique identifiable file name (original hdf5 name + indices + channel?)
