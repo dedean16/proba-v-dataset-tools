@@ -4,6 +4,7 @@ import os
 import numpy as np
 from libtiff import TIFF
 
+# Write tile array to image file (16bit tiff)
 def couple_writer(tile, cnt, jx, jy, ch, level, coord):
     
     # Convert to unsigned 16bit integer
@@ -18,8 +19,8 @@ def couple_writer(tile, cnt, jx, jy, ch, level, coord):
     #==========================================================#
     
     # Construct path string
-    pathstr = 'slices/{}_{}_{}{}'.format(coord[0], coord[1], jx, jy)
-    filestr = '{}-{}-{}.tiff'.format(cnt, level, ch)
+    pathstr = 'slices/{}/{}_{}/{}{}_{}'.format(level, coord[0], coord[1], jx, jy, ch)
+    filestr = '{}-.tiff'.format(cnt)
     
     # Create folder if it doesn't exist yet
     if not os.path.exists(pathstr):
@@ -31,8 +32,8 @@ def couple_writer(tile, cnt, jx, jy, ch, level, coord):
     tiff.close()
 
 
-#### Multithreading
-
+# Slice tiles from HDF5 files
+# Iterate over tile indices and channels, and call couple_writer
 def couple_slicer(f, ind, couplecfg, cnt, coord):
     
     # Determine level type
@@ -42,7 +43,7 @@ def couple_slicer(f, ind, couplecfg, cnt, coord):
     except:
         level = 'LEVEL3'
     
-    ixs, iys = ind                # Unpack calculated image indices
+    ixs, iys = ind                # Unpack calculated tile indices
     
     # Loop over indices, over channels
     for jx in range(len(ixs)-1):
