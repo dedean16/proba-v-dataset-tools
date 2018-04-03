@@ -35,4 +35,5 @@ def couplepaths(coords, mapcfg):
         
     print("\n{} out of {} target coordinates not in local database.\n".format(nempty, len(CC)))
     
+    # Return list of coord-paths-dictionary and total number of files
     return CC, nfiles

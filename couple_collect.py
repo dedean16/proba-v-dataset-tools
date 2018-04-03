@@ -4,13 +4,14 @@ import sys
 
 from paths import *
 from map_cfg import *
+from couple_cfg import *
 from couple_coords import *
 from couple_filepaths import *
 from collect_cfg import *
 from collect_credentials import *
 from collect_wgetthread import *
 
-CC = couplepaths(coords, mapcfg)
+CC, nfiles = couplepaths(coords, mapcfg)
 
 # Parse optional argument 'all' for downloading all
 downloadall = False
@@ -18,13 +19,20 @@ if len(sys.argv) > 1:
     if sys.argv[1] == 'all':
         downloadall = True
     
+# Load list of processed coordinates (processed by couple.py)
+if os.path.exists(couplecfg['coordsdonefilename']):
+    coordsdone = np.load(couplecfg['coordsdonefilename'])
+else:
+    coordsdone = ()
+
 # Initialise thread collection
 threads = []
 
 # Start wget threads
 for C in CC:
     for product in cfg['products']:
-        if (len(C['filepaths']) == 0) or downloadall:
+        
+        if (len(C['filepaths']) == 0 and not C['coord'] in coordsdone) or downloadall:
             
             # Modify coordinates
             cfg['ROI']['xll'] = C['coord'][1]
