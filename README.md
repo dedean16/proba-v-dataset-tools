@@ -13,5 +13,5 @@ PROBA-V Python Data Tool collection for testing Super Resolution algorithms on P
 
 ## Requirements
 - Python 3
-- Python libraries: h5py, numpy
+- Python libraries: h5py, numpy, Pillow, libtiff, progress
 - wget
