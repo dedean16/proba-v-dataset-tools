@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import h5py
+from progress.bar import ShadyBar
+
 
 from couple_cfg import *
 from map_cfg import *
@@ -12,6 +14,7 @@ from couple_writer import *
 CC, npaths = couplepaths(coords, mapcfg)
 
 cnt = 0
+bar = ShadyBar('Processing files... ETA: %(eta)ds', max=npaths, width=25)
 
 for C in CC:
     
@@ -25,9 +28,11 @@ for C in CC:
             couple_slicer(f, ind, couplecfg, cnt, coord)
             
             cnt += 1
-            print('{}/{} files processed'.format(cnt, npaths))
+            bar.next()
             
         # Retrieve data from selected chunk
         # Write data as image file, with unique identifiable file name (original hdf5 name + indices + channel?)
         # Repeat for all hdf5 files corresponding to this image
         # Register coordinate as 'done'
+
+bar.finish()
