@@ -1,0 +1,9 @@
+#!/bin/bash
+echo Will install packages h5py numpy Pillow libtiff progress with pip3...
+echo Press Enter to continue...
+read a
+sudo pip3 install h5py numpy Pillow libtiff progress
+echo
+echo Press Enter to exit...
+read a
+
