@@ -3,6 +3,7 @@
 import h5py
 from progress.bar import ShadyBar
 
+from custom_functions import *
 from couple_cfg import *
 from map_cfg import *
 from couple_coords import *
@@ -27,8 +28,10 @@ for C in CC:
     # Iterate over filepaths for this coordinate
     for filepath in filepaths:
         with h5py.File(filepath, 'r') as f:                 # Open HDF5 file
-            ind = couple_indexer(f, coord, couplecfg)       # Find tile coords
-            couple_slicer(f, ind, couplecfg, cnt, coord)    # Slice tiles, write files
+            
+            # Find tile coords, Slice tiles and write files
+            ind = couple_indexer(f, coord, couplecfg)
+            couple_slicer(f, ind, couplecfg, cnt, coord)
             
             # Finish up iteration
             cnt += 1                        # Count processed files
@@ -39,4 +42,8 @@ for C in CC:
 bar.finish()                                # Finish progress bar
 print('Done processing {} files.'.format(nfiles))
 
-#### Save coordsdone
+# Save list of processed coordinates
+filename = couplecfg['coordsdonefilename']
+np.save(filename, coordsdone)               # Save file
+filesize = sizestr(os.path.getsize(filename), sep=' ')    # File size rounded
+print("Saved list of {} processed coordinates to file '{}' ({}).\n".format(len(CC), filename, filesize))
