@@ -10,7 +10,7 @@ from paths import *
 
 # Construct HDF5 database list
 pattern = os.path.join(paths['data'], '**/*.[Hh][Dd][Ff]5')
-filepaths = list(glob.iglob(pattern, recursive = True))
+filepaths = glob.glob(pattern, recursive = True)
 
 # Initialise progress bar and error counter
 bar = ShadyBar('Checking database files...', max=len(filepaths), width=25)
