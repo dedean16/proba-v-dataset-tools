@@ -3,7 +3,6 @@ PROBA-V Python Data Tool collection for testing Super Resolution algorithms on P
 
 ## Tools:
 - `[COLLECT]:` Downloads PROBA-V satellite images from the website with `wget`.
-- `[SHOW]:` A means of showing (manageable slices) of satellite image data files.
 - `[MAP]:` Generates a map that shows the contents of the dataset in a clear overview.
 - `[COUPLE]:` Sorts out corresponding 100m and 300m downloaded data
 - `[FILTER]:` Filters images to construct a smaller subset containing all features/cases important for testing super resolution.
