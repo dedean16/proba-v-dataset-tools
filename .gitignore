@@ -17,3 +17,6 @@ wget-log*
 
 # All files in the tiles folder
 /tiles
+
+# Fuse hidden files
+.fuse_hidden*
