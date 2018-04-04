@@ -42,6 +42,9 @@
         img.src = src;                          // Set image source
         img.showlayer = true;                   // Initialise layer as enabled
         imgs.push(img);                         // Add image to list
+        img.onload = function() {               // Redraw when image is loaded
+            draw(ctx, imgs)
+        };
     }
     
     // Draw all enabled image layers
@@ -84,9 +87,6 @@
     }
     
     id('layercheckboxes').innerHTML = html;
-    
-    // Draw images
-    draw(ctx, imgs);
 
 </script>
 
