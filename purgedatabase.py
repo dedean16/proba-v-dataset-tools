@@ -8,6 +8,14 @@ from progress.bar import ShadyBar
 
 from paths import *
 
+
+def checkitems(f):
+    # Iterate recursively over HDF5 children
+    if hasattr(f, 'keys'):
+        for key in f.keys():
+            checkitems(f[key])
+        
+    
 # Construct HDF5 database list
 pattern = os.path.join(paths['data'], '**/*.[Hh][Dd][Ff]5')
 filepaths = glob.glob(pattern, recursive = True)
@@ -20,17 +28,19 @@ print('\n')
 
 # Iterate over all HDF5 files
 for filepath in filepaths:
+    
     try:
         with h5py.File(filepath, 'r') as f:
-            pass
-
+            # Recursively check all items
+            checkitems(f)
+        
     # Check if any file loading errors occur
-    except OSError:
+    except (KeyError, RuntimeError, OSError):
         nerr += 1                   # Count file errors
         print('\nCould not load file:\n' + filepath)
         print('Removing file.\n')
         os.remove(filepath)         # Delete file!
-    
+        
     bar.next()                      # Show progress bar
 
 bar.finish()
