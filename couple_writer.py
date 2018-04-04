@@ -15,15 +15,17 @@ def couple_writer(tile, cnt, jx, jy, ch, level, coord, filepath, tilepath):
     # We shouldn't be doing this in the final run, but it makes
     # it a lot easier to actually read the images, as the maxima
     # of most images are well below the maximum of 2^16
-    utile = (utile * (2**16 / np.max(utile))).astype('uint16')
+    # utile = (utile * (2**16 / np.max(utile))).astype('uint16')
     #==========================================================#
     
     # Construct path and file strings
     dirpath, filename = os.path.split(filepath)
-    filematch = re.search(r'PROBAV_(.+?).HDF5', filename, re.I)
     pathstr = '{}/{}/{}_{}/{}{}_{}'.format(tilepath, level, coord[0], coord[1], jx, jy, ch)
     try:
-        filestr = filematch.group(1) + '.tiff'
+        # Use original filename (without PROBAV_ prefix and extension)
+        # N.B.: couple_collect relies on these files to have the same
+        #       name as the corresponding HDF5 files!
+        filestr = filename[7:-5] + '.tiff'
     except:
         print('Invalid file name pattern:\n' + filepath)
         return
