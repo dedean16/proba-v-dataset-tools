@@ -8,11 +8,14 @@ paths = {}
 # N.B. Relative to proba-v-data-collector.py
 datarelpath = '/../data'         # Points to data folder
 wgetrelpath = '/../wget/wget'    # Points to wget executable (Windows only)
-# Note: As wget is usually installed by default on Linux distros, it is assumed this command is present. specos.py deals with platform specific cases such as these.
+tilespath   = '/tiles'
+# Note: As wget is usually installed by default on Linux distros, it is assumed this command is present. paths.py deals with platform specific cases such as these.
 
+#=============================================================#
 # Construct common paths
 repopath = os.path.dirname(__file__)
 paths['data'] = os.path.realpath(repopath + datarelpath)
+paths['tiles'] = os.path.realpath(repopath + tilespath)
 
 # Construct specific paths
 if os.name == "nt":

@@ -15,5 +15,5 @@ wget-log*
 # numpy data files
 *.npy
 
-# All files in the slices folder
-/slices
+# All files in the tiles folder
+/tiles

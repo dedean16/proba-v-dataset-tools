@@ -5,7 +5,7 @@ import numpy as np
 from libtiff import TIFF
 
 # Write tile array to image file (16bit tiff)
-def couple_writer(tile, cnt, jx, jy, ch, level, coord, filepath):
+def couple_writer(tile, cnt, jx, jy, ch, level, coord, filepath, tilepath):
     
     # Convert to unsigned 16bit integer
     utile = tile.astype('uint16')
@@ -21,7 +21,7 @@ def couple_writer(tile, cnt, jx, jy, ch, level, coord, filepath):
     # Construct path and file strings
     dirpath, filename = os.path.split(filepath)
     filematch = re.search(r'PROBAV_(.+?).HDF5', filename, re.I)
-    pathstr = 'slices/{}/{}_{}/{}{}_{}'.format(level, coord[0], coord[1], jx, jy, ch)
+    pathstr = '{}/{}/{}_{}/{}{}_{}'.format(tilepath, level, coord[0], coord[1], jx, jy, ch)
     try:
         filestr = filematch.group(1) + '.tiff'
     except:
@@ -40,7 +40,7 @@ def couple_writer(tile, cnt, jx, jy, ch, level, coord, filepath):
 
 # Slice tiles from HDF5 files
 # Iterate over tile indices and channels, and call couple_writer
-def couple_slicer(f, ind, couplecfg, cnt, coord):
+def couple_slicer(f, ind, couplecfg, cnt, coord, tilepath):
     
     # Determine level type
     try:
@@ -63,5 +63,5 @@ def couple_slicer(f, ind, couplecfg, cnt, coord):
                     
                     # Ignore empty images
                     if np.max(tile) > -1:
-                        couple_writer(tile, cnt, jx, jy, ch, level, coord, f.filename)
+                        couple_writer(tile, cnt, jx, jy, ch, level, coord, f.filename, tilepath)
     return

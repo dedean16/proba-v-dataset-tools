@@ -33,7 +33,7 @@ for C in CC:
                 
                 # Find tile coords, Slice tiles and write files
                 ind = couple_indexer(f, coord, couplecfg)
-                couple_slicer(f, ind, couplecfg, cnt, coord)
+                couple_slicer(f, ind, couplecfg, cnt, coord, paths['tiles'])
                 
                 # Finish up iteration
                 cnt += 1                        # Count processed files
