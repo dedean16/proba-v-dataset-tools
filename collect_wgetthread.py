@@ -61,12 +61,17 @@ class wgetstatus(Thread):
         paths = self.paths
         nfilesdone = self.nfilesdone
         
+        # Recalculate folder size every itrecalcsize iterations
+        itrecalcsize = 15
+        
         print('Rejecting {} previously processed files.'.format(nfilesdone))
+        print('Elapsed:         Threads:   Downloaded:   Data folder:')
         
         wgetdone   = False             # Break if this gets True
         starttime  = time()            # Start time of process
         startsize  = get_dirsize(paths['data']) # Start size of data folder
         
+        i = itrecalcsize
         # Output status of wget until all wget threads are done
         while True:
             
@@ -78,12 +83,15 @@ class wgetstatus(Thread):
             # Count number of active threads
             nth = active_count()
             
-            # Calculate data folder size and accumulated size since start
-            dirsize  = get_dirsize(paths['data'])
-            downsize = dirsize - startsize
+            # Recalculate data folder size every itrecalcsize iterations
+            if i == itrecalcsize:
+                # Calculate data folder size and accumulated size since start
+                dirsize  = get_dirsize(paths['data'])
+                downsize = dirsize - startsize
+                i = 0
             
             # Write terminal output
-            sys.stdout.write('\r{} min {} sec  Threads: {}  Downloaded: {}  Data folder: {}    '.format(Dmin, Dsec, nth, sizestr(downsize), sizestr(dirsize)))
+            sys.stdout.write('\r{:>3} min {:>2} sec   {:2}         {:6}        {:6}    '.format(Dmin, Dsec, nth, sizestr(downsize, signif=3), sizestr(dirsize, signif=3)))
             sys.stdout.flush()
             
             # Check if wget threads have finished
@@ -92,7 +100,7 @@ class wgetstatus(Thread):
             if wgetdone: break
             
             # Sleep till next iteration
-            sleep(10)
-            
+            sleep(1)
+            i += 1
             
         print('\n')
