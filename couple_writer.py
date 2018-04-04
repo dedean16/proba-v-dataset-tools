@@ -57,13 +57,20 @@ def couple_slicer(f, ind, couplecfg, cnt, coord, tilepath):
     for jx in range(len(ixs)-1):
         for jy in range(len(iys)-1):
             for ch in couplecfg['channels']:
-                for fullimg in f[level+'/RADIOMETRY/'+ch].items():
-                    # This will contain only one item, named either TOA or TOC
+                try:
+                    for fullimg in f[level+'/RADIOMETRY/'+ch].items():
+                        # This will contain only one item, named either TOA or TOC
+                        
+                        # Extract tile as numpy array
+                        tile = fullimg[1][ iys[jx]:iys[jx+1], ixs[jx]:ixs[jx+1] ]
+                        
+                        # Ignore empty images
+                        if np.max(tile) > -1:
+                            couple_writer(tile, cnt, jx, jy, ch, level, coord, f.filename, tilepath)
                     
-                    # Extract tile as numpy array
-                    tile = fullimg[1][ iys[jx]:iys[jx+1], ixs[jx]:ixs[jx+1] ]
-                    
-                    # Ignore empty images
-                    if np.max(tile) > -1:
-                        couple_writer(tile, cnt, jx, jy, ch, level, coord, f.filename, tilepath)
+                except (KeyError, RuntimeError):
+                    print('Error when reading file:')
+                    print(f.filename)
+                    print('This could be caused by a corrupt file.')
+                    exit()
     return
