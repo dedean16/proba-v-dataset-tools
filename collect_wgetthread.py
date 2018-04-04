@@ -14,11 +14,12 @@ def coordstr(roi):
 # Threaded wget database fetcher class
 class wgetthread(Thread):
     # Initialise thread
-    def __init__(self, cfg, paths, product):
+    def __init__(self, cfg, paths, product, filesdone=''):
         Thread.__init__(self)
         self.cfg     = cfg
         self.paths   = paths
         self.product = product
+        self.filesdone = filesdone
     
     # Run thread
     def run(self):
@@ -26,6 +27,7 @@ class wgetthread(Thread):
         cfg     = self.cfg
         paths   = self.paths
         product = self.product
+        filesdone = self.filesdone
 
         year     = cfg['year']
         month    = cfg['month']
@@ -43,21 +45,23 @@ class wgetthread(Thread):
         url = baseurl + product + str(year) + '/' + str(month) + '/?coord=' + coordstr(ROI)
         
         # Fetch data using wget
-        call([wgetpath, '-r', '--user=' + username, '--password=' + password, '-P' + datapath, '-nH', '-q', '--reject=*.html*,*.tiff,*.png,*.pdf',  url])
+        call([wgetpath, '-r', '--user=' + username, '--password=' + password, '-P' + datapath, '-nH', '-q', '--reject=*.html*,*.tiff,*.png,*.pdf'+filesdone,  url])
 
 
 # Threaded status terminal output
 class wgetstatus(Thread):
     # Initialise thread
-    def __init__(self, paths):
+    def __init__(self, paths, nfilesdone=0):
         Thread.__init__(self)
         self.paths = paths
+        self.nfilesdone = nfilesdone
     
     # Run thread
     def run(self):
         paths = self.paths
+        nfilesdone = self.nfilesdone
         
-        # print('For detailed output, see wget-log.txt.')
+        print('Rejecting {} previously processed files.'.format(nfilesdone))
         
         wgetdone   = False             # Break if this gets True
         starttime  = time()            # Start time of process
@@ -79,7 +83,7 @@ class wgetstatus(Thread):
             downsize = dirsize - startsize
             
             # Write terminal output
-            sys.stdout.write('\r{} min {} sec  Threads: {}  Downloaded: {}  Data folder: {}   '.format(Dmin, Dsec, nth, sizestr(downsize), sizestr(dirsize)))
+            sys.stdout.write('\r{} min {} sec  Threads: {}  Downloaded: {}  Data folder: {}    '.format(Dmin, Dsec, nth, sizestr(downsize), sizestr(dirsize)))
             sys.stdout.flush()
             
             # Check if wget threads have finished

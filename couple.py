@@ -3,6 +3,7 @@
 import h5py
 from progress.bar import ShadyBar
 
+from paths import *
 from custom_functions import *
 from couple_cfg import *
 from map_cfg import *
@@ -17,7 +18,6 @@ CC, nfiles = couplepaths(coords, mapcfg)
 # Initialise file counter, progress bar and processed coords list
 cnt = 0
 bar = ShadyBar('Processing files... ETA: %(eta)ds', max=nfiles, width=25)
-coordsdone = []
 fileerror = False
 
 # Interate over coordinates
@@ -39,8 +39,6 @@ for C in CC:
                 cnt += 1                        # Count processed files
                 bar.next()                      # Show progress bar
                 
-            coordsdone.append(coord)            # Add to list of processed coords
-        
         # Break out of loops in case of file error
         except OSError:
             print('Error opening file:\n' + filepath)
@@ -51,12 +49,5 @@ for C in CC:
 
 bar.finish()                                # Finish progress bar
 
-# Save list of processed coords if no errors occured
-if not fileerror:
-    print('Done processing {} files.'.format(nfiles))
-
-    # Save list of processed coordinates
-    filename = couplecfg['coordsdonefilename']              # Fetch filename
-    np.save(filename, coordsdone)                           # Save file
-    filesize = sizestr(os.path.getsize(filename), sep=' ')  # File size rounded
-    print("Saved list of {} processed coords to '{}' ({}).\n".format(len(coordsdone), filename, filesize))
+# Report done if no error occurred
+if not fileerror: print('Done processing {} files.'.format(nfiles))

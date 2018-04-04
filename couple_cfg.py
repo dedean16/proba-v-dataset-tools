@@ -11,6 +11,3 @@ couplecfg['ntilesy'] = 3     # y direction
 
 # Color channels to export
 couplecfg['channels'] = ['NIR', 'RED', 'BLUE', 'SWIR']
-
-# Coordsdone filename
-couplecfg['coordsdonefilename'] = 'coordsdone.npy'
