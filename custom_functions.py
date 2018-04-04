@@ -3,6 +3,7 @@
 # General functions that can not be categorized as mathematical
 
 import os
+from extra_math import *
 
 # Get total size of a folder
 def get_dirsize(start_path):
@@ -15,14 +16,18 @@ def get_dirsize(start_path):
 
 
 # Print file size as rounded string in B, KB, MB, GB or TB
-def sizestr(sizebytes, sep=''):
-    if sizebytes < 10**3:
-        return '{}{}B'.format(sizebytes, sep)
-    elif sizebytes < 10**6:
-        return '{}{}KB'.format(round(sizebytes/10**3), sep)
-    elif sizebytes < 10**9:
-        return '{}{}MB'.format(round(sizebytes/10**6), sep)
-    elif sizebytes < 10**12:
-        return '{}{}GB'.format(round(sizebytes/10**9), sep)
+def sizestr(sizebytes, sep='', signif=3):
+    
+    # Round size to 3 significant digits
+    roundbytes = roundsignificant(sizebytes, signif)
+    
+    if abs(sizebytes) < 10**3:
+        return '{}{}B'.format(roundbytes, sep)
+    elif abs(sizebytes) < 10**6:
+        return '{}{}KB'.format(maybeint(roundbytes/10**3), sep)
+    elif abs(sizebytes) < 10**9:
+        return '{}{}MB'.format(maybeint(roundbytes/10**6), sep)
+    elif abs(sizebytes) < 10**12:
+        return '{}{}GB'.format(maybeint(roundbytes/10**9), sep)
     else:
-        return '{}{}TB'.format(round(sizebytes/10**12), sep)
+        return '{}{}TB'.format(maybeint(roundbytes/10**12), sep)
