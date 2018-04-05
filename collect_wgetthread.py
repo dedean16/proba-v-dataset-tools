@@ -63,12 +63,14 @@ class wgetstatus(Thread):
         
         # Recalculate folder size every itrecalcsize iterations
         itrecalcsize = 15
+        downsize = 0                    # Will hold the downloaded size
         
-        print('Rejecting {} previously processed files.'.format(nfilesdone))
-        print('Elapsed:         Threads:   Downloaded:   Data folder:')
+        print('\nStarting wget downloads...')
+        print('Rejecting {} previously processed files.\n'.format(nfilesdone))
+        print('Elapsed:        Threads:  Downloaded:  Data folder:  Speed:')
         
-        wgetdone   = False             # Break if this gets True
-        starttime  = time()            # Start time of process
+        wgetdone   = False              # Break if this gets True
+        starttime  = time()             # Start time of process
         startsize  = get_dirsize(paths['data']) # Start size of data folder
         
         i = itrecalcsize
@@ -86,17 +88,19 @@ class wgetstatus(Thread):
             # Recalculate data folder size every itrecalcsize iterations
             if i == itrecalcsize:
                 # Calculate data folder size and accumulated size since start
-                dirsize  = get_dirsize(paths['data'])
-                downsize = dirsize - startsize
-                i = 0
+                dirsize      = get_dirsize(paths['data'])   # Tot. folder size
+                lastdownsize = downsize                     # Last downl size
+                downsize     = dirsize - startsize          # New downl size
+                downspeed    = (downsize - lastdownsize) / itrecalcsize
+                i = 1                                       # Reset iter. num
             
             # Write terminal output
-            sys.stdout.write('\r{:>3} min {:>2} sec   {:2}         {:6}        {:6}    '.format(Dmin, Dsec, nth, sizestr(downsize, signif=3), sizestr(dirsize, signif=3)))
+            sys.stdout.write('\r{:>3} min {:>2} sec  {:2}        {:6}       {:6}       {:9}'.format(Dmin, Dsec, nth, sizestr(downsize), sizestr(dirsize), sizestr(downspeed)+'/s'))
             sys.stdout.flush()
             
             # Check if wget threads have finished
             # (if so, only 2 threads should be left in total)
-            wgetactive = (nth > 2)
+            wgetdone = (nth <= 2)
             if wgetdone: break
             
             # Sleep till next iteration
