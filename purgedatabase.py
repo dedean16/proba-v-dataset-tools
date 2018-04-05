@@ -8,7 +8,7 @@ with warnings.catch_warnings():
     import h5py
     
 import os, sys, glob
-from progress.bar import ShadyBar
+from progress.bar import IncrementalBar
 from paths import *
 
 
@@ -32,7 +32,7 @@ filepaths = glob.glob(pattern, recursive = True)
 
 # Initialise progress bar and error counter
 print('')
-bar = ShadyBar('Checking database files...', max=len(filepaths), width=25)
+bar = IncrementalBar('Checking database files...', max=len(filepaths), width=25)
 nerr = 0
 
 # Iterate over all HDF5 files

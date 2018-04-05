@@ -6,7 +6,7 @@ with warnings.catch_warnings():
     warnings.simplefilter('ignore')
     import h5py
 
-from progress.bar import ShadyBar
+from progress.bar import IncrementalBar
 
 from paths import *
 from custom_functions import *
@@ -22,7 +22,7 @@ CC, nfiles = couplepaths(coords, mapcfg)
 
 # Initialise file counter, progress bar and processed coords list
 cnt = 0
-bar = ShadyBar('Processing files... ETA: %(eta)ds', max=nfiles, width=25)
+bar = IncrementalBar('Processing files... ETA: %(eta)ds', max=nfiles, width=25)
 fileerror = False
 
 # Interate over coordinates
