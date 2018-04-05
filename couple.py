@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 
-import h5py
+# Import h5py but suppress warning
+import warnings
+with warnings.catch_warnings():
+    warnings.simplefilter('ignore')
+    import h5py
+
 from progress.bar import ShadyBar
 
 from paths import *

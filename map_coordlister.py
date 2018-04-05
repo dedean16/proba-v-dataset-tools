@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
-import os
-import glob
-import h5py
+
+# Import h5py but suppress warning
+import warnings
+with warnings.catch_warnings():
+    warnings.simplefilter('ignore')
+    import h5py
+
+import os, glob
+
 
 # Return a list of unique coordinates contained in the database
 def coordlister(paths, mapcfg):
