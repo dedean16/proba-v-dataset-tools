@@ -17,5 +17,14 @@ cfg['ROI']     = ROI
 
 # Product URLs
 cfg['baseurl']  = 'http://www.vito-eodata.be/PDF/datapool/Free_Data/'
+
+#=============================================#
+# Set list of products - choose one or define your own
+# Level 3 - S1
 # cfg['products'] = ['PROBA-V_100m/S1_TOC_100_m_C1/', 'PROBA-V_300m/S1_TOC_-_300_m_C1/']
-cfg['products'] = ['PROBA-V_300m/L2A_-_300_m_C1/', 'PROBA-V_100m/L2A_-_100_m_C1/']
+#
+# Level 2A
+# cfg['products'] = ['PROBA-V_300m/L2A_-_300_m_C1/', 'PROBA-V_100m/L2A_-_100_m_C1/']
+#
+# Level 3 and Level 2A
+cfg['products'] = ['PROBA-V_300m/L2A_-_300_m_C1/', 'PROBA-V_100m/L2A_-_100_m_C1/', 'PROBA-V_100m/S1_TOC_100_m_C1/', 'PROBA-V_300m/S1_TOC_-_300_m_C1/']
