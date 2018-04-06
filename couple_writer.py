@@ -62,7 +62,7 @@ def couple_slicer(f, ind, couplecfg, cnt, coord, tilepath):
                         # This will contain only one item, named either TOA or TOC
                         
                         # Extract tile as numpy array
-                        tile = fullimg[1][ iys[jx]:iys[jx+1], ixs[jx]:ixs[jx+1] ]
+                        tile = fullimg[1][ iys[jy]:iys[jy+1], ixs[jx]:ixs[jx+1] ]
                         
                         # Ignore empty images
                         if np.max(tile) > -1:
