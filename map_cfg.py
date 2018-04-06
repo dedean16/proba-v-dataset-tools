@@ -29,3 +29,8 @@ mapcfg['colors'] = [
 mapcfg['outlinecolor'] = (0, 0, 0, b)       # Color of marked region outline
 mapcfg['ROIfilename']  = 'ROIdata.npy'      # ROI data file name
 mapcfg['basemap'] = './map/img/equirectmap-bw.jpg' # Path to base layer image
+
+# Input coordinate markers
+mapcfg['markeroutlinecolor'] = (0, 0, 0, 255)
+mapcfg['markercolor'] = (255, 255, 255, 255)
+mapcfg['markerradius'] = 4

@@ -29,9 +29,10 @@
 <script>
     "use strict";
     //=== Parameters ===//
-    var basesrc  = 'img/equirectmap-bw.jpg';    // Source of base layer
-    var layersrc = 'img/maplayer';              // Source of layer (without number)
-    var layerext = '.png';                      // Layer file extension
+    var basesrc   = 'img/equirectmap-bw.jpg';   // Source of base layer
+    var markersrc = 'img/markerlayer.png';      // Source of selected coords marker layer
+    var layersrc  = 'img/maplayer';             // Source of layer (without number)
+    var layerext  = '.png';                     // Layer file extension
     
     // Easy ID access
     function id(id) { return document.getElementById(id); }
@@ -49,7 +50,7 @@
     
     // Draw all enabled image layers
     function draw(ctx, imgs) {
-        for (var i = 0; i < nlayers; i++) {
+        for (var i = 0; i < imgs.length; i++) {
             var img = imgs[i];
             
             if (img.showlayer) {                // If layer is enabled
@@ -63,23 +64,26 @@
         draw(ctx, imgs);
     }
     
-    var nlayers = products.length + 1;           // Number of marked layers (not base layer)
+    products.push('Selected coordinates')
+    var nlayers = products.length;              // Number of marked layers (not base layer)
     
-    // Initialise and load images
+    // Initialise and load images (order of imgs == order of layers)
     var imgs = [];
     loadimg(imgs, basesrc);
         
-    for (var i = 0; i < nlayers; i++) {
+    for (var i = 0; i < nlayers-1; i++) {
         var src = layersrc + i + layerext;
         loadimg(imgs, src);
     }
+    
+    loadimg(imgs, markersrc)
     
     // Add canvas element and
     var ctx = id('canvas').getContext("2d");
     
     // Add checkboxes for each layer
     var html = '';
-    for (var i = 1; i < nlayers; i++) {
+    for (var i = 1; i <= nlayers; i++) {
         html = html + "<div><label>\
         <input type='checkbox' oninput = 'toggle("+i+");' checked>\
         <b>Layer " + i + ": </b>" + products[i-1] + "&nbsp;&nbsp;&nbsp;\

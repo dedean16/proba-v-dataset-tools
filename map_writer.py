@@ -3,7 +3,7 @@ from PIL import Image, ImageDraw
 from extra_math import linefunc
 
 # Mark regions in layers and write to image files
-def mapper(uniROIdata, paths, mapcfg):
+def mapper(uniROIdata, paths, mapcfg, coords):
     
     # Read resolution from basemap image
     imsize = Image.open(mapcfg['basemap']).size
@@ -49,5 +49,27 @@ def mapper(uniROIdata, paths, mapcfg):
         img.save('map/img/maplayer{}.png'.format(i), 'PNG')
         
     print("Done marking {} regions on {} layers.".format(len(uniROIdata), npr))
+    
+    
+    #======================================================#
+    #========= Mark input coords as points on map =========#
+    
+    markerimg = Image.new('RGBA', imsize)       # Initialise input coords image
+    r = mapcfg['markerradius']                  # Fetch marker radius
+    
+    for coord in coords:                        # Iterate over input coords
+        x = int(maplon(coord[1]))
+        y = int(maplat(coord[0]))
         
+        # Draw marker circle
+        ImageDraw.Draw(markerimg).ellipse(\
+                        (x-r, y-r, x+r, y+r),\
+                        fill = mapcfg['markercolor'],\
+                        outline = mapcfg['markeroutlinecolor'])
+    
+    # Save input coords marker image
+    markerimg.save('map/img/markerlayer.png', 'PNG')
+    
+    print("Done marking {} coordinates on input coordinate layer.".format(len(coords)))
+    
     return

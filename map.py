@@ -8,10 +8,11 @@ from map_coordlister import *
 from map_writer import *
 from map_genjs import *
 from map_cfg import *
+from couple_coords import *
 
 allROIdata, uniROIdata = coordlister(paths, mapcfg) # List all unique ROI
 genjs(mapcfg)                                       # Generate javascript
-mapper(uniROIdata, paths, mapcfg)                   # Mark regions in layers
+mapper(uniROIdata, paths, mapcfg, coords)           # Mark regions in layers
 
 # Write ROI data to file
 filename = mapcfg['ROIfilename']                    # File name
