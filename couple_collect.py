@@ -34,8 +34,8 @@ for c in coords:
         # Modify coordinates
         cfg['ROI']['xll'] = c[1]
         cfg['ROI']['yll'] = c[0]
-        cfg['ROI']['xur'] = c[1]
-        cfg['ROI']['yur'] = c[0]
+        cfg['ROI']['xur'] = c[1] + cfg['pointROIoffset']
+        cfg['ROI']['yur'] = c[0] + cfg['pointROIoffset']
         
         # Start thread
         th = wgetthread(cfg, paths, product, filesdone)

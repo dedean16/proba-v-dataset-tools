@@ -28,3 +28,6 @@ cfg['baseurl']  = 'http://www.vito-eodata.be/PDF/datapool/Free_Data/'
 #
 # Level 3 and Level 2A
 cfg['products'] = ['PROBA-V_300m/L2A_-_300_m_C1/', 'PROBA-V_100m/L2A_-_100_m_C1/', 'PROBA-V_100m/S1_TOC_100_m_C1/', 'PROBA-V_300m/S1_TOC_-_300_m_C1/']
+
+# Since the corner coordinates can't be the same, this is added in the case of single points
+cfg['pointROIoffset'] = 1

@@ -44,6 +44,8 @@ class wgetthread(Thread):
         # Construct URL
         url = baseurl + product + str(year) + '/' + str(month) + '/?coord=' + coordstr(ROI)
         
+        sleep(0.3)  # Give wgetstatus some time to calculate data folder size
+        
         # Fetch data using wget
         call([wgetpath, '-r', '--user=' + username, '--password=' + password, '-P' + datapath, '-nH', '-q', '--reject=*.html*,*.tiff,*.png,*.pdf'+filesdone,  url])
 
@@ -95,7 +97,7 @@ class wgetstatus(Thread):
                 i = 1                                       # Reset iter. num
             
             # Write terminal output
-            sys.stdout.write('\r{:>3} min {:>2} sec  {:2}        {:6}       {:6}       {:9}'.format(Dmin, Dsec, nth, sizestr(downsize), sizestr(dirsize), sizestr(downspeed)+'/s'))
+            sys.stdout.write('\r{:>3} min {:>2} sec  {:2}        {:6}       {:6}        {:9}'.format(Dmin, Dsec, nth, sizestr(downsize), sizestr(dirsize), sizestr(downspeed)+'/s'))
             sys.stdout.flush()
             
             # Check if wget threads have finished
