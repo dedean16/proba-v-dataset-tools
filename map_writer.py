@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-from PIL import Image, ImageDraw
-from extra_math import linefunc
+from PIL import Image, ImageDraw, ImageFont
+from extra_math import linefunc, roundas
 
 # Mark regions in layers and write to image files
 def mapper(uniROIdata, paths, mapcfg, coords):
@@ -33,10 +33,11 @@ def mapper(uniROIdata, paths, mapcfg, coords):
         r,g,b,a = mapcfg['colors'][iprod]
         
         # Draw rectangle
-        ImageDraw.Draw(imgs[iprod]).rectangle(\
-                        (x1, y1, x2, y2),\
-                        fill = (r, g, b, a),\
-                        outline = mapcfg['outlinecolor'])
+        ImageDraw.Draw(imgs[iprod]).rectangle(
+            (x1, y1, x2, y2),
+            fill = (r, g, b, a),
+            outline = mapcfg['outlinecolor'],
+        )
         
         # Note:
         # Currently, each rectangle draw replaces the previous one,
@@ -57,16 +58,48 @@ def mapper(uniROIdata, paths, mapcfg, coords):
     markerimg = Image.new('RGBA', imsize)       # Initialise input coords image
     r = mapcfg['markerradius']                  # Fetch marker radius
     
+    nx = 50                                     # Number of y pixels to round to
+    ny = 10                                     # Number of x pixels to round to
+    xyr = []                                    # Initialise rounded coord array
+    
     for coord in coords:                        # Iterate over input coords
-        x = int(maplon(coord[1]))
-        y = int(maplat(coord[0]))
+        x = int(maplon(coord[1]))               # Calculate image coord x
+        y = int(maplat(coord[0]))               # Calculate image coord y
+        
+        # Deal with overlapping coordinates
+        xr = roundas(x, nx)                     # Round x as multiple of n
+        yr = roundas(y, ny)                     # Round y as multiple of n
+        linenum = xyr.count((xr, yr))           # Count number of occurences
+        xyr.append((xr, yr))                    # Add to list of occurences
+        
+        # Prepare text information
+        fnt = ImageFont.load_default()
+        text = '({:.2f}, {:.2f})'.format(*coord)
+        w, h = fnt.getsize(text)
+        
+        yline = y + h*linenum - int(h/2)        # Calculate text y coord
+        
+        # Draw text background
+        ImageDraw.Draw(markerimg).rectangle(
+            (x+5, yline, x+4+w, yline+h-1),
+            fill = (255, 255, 255, 128)
+        )
+        
+        # Draw text
+        ImageDraw.Draw(markerimg).text(
+            (x+5, yline),
+            text,
+            fill = mapcfg['markeroutlinecolor'],
+        )
         
         # Draw marker circle
-        ImageDraw.Draw(markerimg).ellipse(\
-                        (x-r, y-r, x+r, y+r),\
-                        fill = mapcfg['markercolor'],\
-                        outline = mapcfg['markeroutlinecolor'])
-    
+        ImageDraw.Draw(markerimg).ellipse(
+            (x-r, y-r, x+r, y+r),
+            fill = mapcfg['markercolor'],
+            outline = mapcfg['markeroutlinecolor'],
+        )
+        
+        
     # Save input coords marker image
     markerimg.save('map/img/markerlayer.png', 'PNG')
     

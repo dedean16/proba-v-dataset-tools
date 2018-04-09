@@ -16,6 +16,9 @@ def roundsignificant(x, n):
     else:
         return round(x, -int(log10(abs(x))) + n-1)
 
+def roundas(x, n):
+    return n * round(x/n)
+
 # Convert x to integer if it has no trailing decimals
 def maybeint(x):
     if x % 1 == 0:
