@@ -15,8 +15,11 @@ wget-log*
 # numpy data files
 *.npy
 
-# All files in the tiles folder
+# The tiles folder
 /tiles
+
+# The tilebackups folder
+/tilebackups
 
 # Fuse hidden files
 .fuse_hidden*
