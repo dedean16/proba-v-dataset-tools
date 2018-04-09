@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from PIL import Image, ImageDraw, ImageFont
-from extra_math import linefunc, roundas
+from extra_math import linefunc, rectcoll
 
 # Mark regions in layers and write to image files
 def mapper(uniROIdata, paths, mapcfg, coords):
@@ -58,25 +58,23 @@ def mapper(uniROIdata, paths, mapcfg, coords):
     markerimg = Image.new('RGBA', imsize)       # Initialise input coords image
     r = mapcfg['markerradius']                  # Fetch marker radius
     
-    nx = 50                                     # Number of y pixels to round to
-    ny = 10                                     # Number of x pixels to round to
-    xyr = []                                    # Initialise rounded coord array
+    xywh = []                                   # Initialise rounded coord array
     
     for coord in coords:                        # Iterate over input coords
         x = int(maplon(coord[1]))               # Calculate image coord x
         y = int(maplat(coord[0]))               # Calculate image coord y
-        
-        # Deal with overlapping coordinates
-        xr = roundas(x, nx)                     # Round x as multiple of n
-        yr = roundas(y, ny)                     # Round y as multiple of n
-        linenum = xyr.count((xr, yr))           # Count number of occurences
-        xyr.append((xr, yr))                    # Add to list of occurences
         
         # Prepare text information
         fnt = ImageFont.load_default()
         text = '({:.2f}, {:.2f})'.format(*coord)
         w, h = fnt.getsize(text)
         
+        # Deal with overlapping coordinates
+        b = (x, y, w, h/2)                      # If overlap is more than half
+        linenum = [rectcoll(a, b) for a in xywh].count(True)  # Count occurences
+        
+        xywh.append(b)                          # Add to list of occurences
+
         yline = y + h*linenum - int(h/2)        # Calculate text y coord
         
         # Draw text background

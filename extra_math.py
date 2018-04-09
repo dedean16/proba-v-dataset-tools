@@ -16,6 +16,7 @@ def roundsignificant(x, n):
     else:
         return round(x, -int(log10(abs(x))) + n-1)
 
+# Round x to nearest multiple of n
 def roundas(x, n):
     return n * round(x/n)
 
@@ -24,3 +25,16 @@ def maybeint(x):
     if x % 1 == 0:
         x = int(x)
     return x
+
+# Convert rectangle from (x, y, w, h) to (xc, yc, w/2, h/2)
+def rectmid(a):
+    return (a[0]+a[2]/2, a[1]+a[3]/2, a[2]/2, a[3]/2)
+
+# Check if two rectangles (x, y, w, h) overlap/collide
+def rectcoll(a, b):
+    ac = rectmid(a)
+    bc = rectmid(b)
+    xcol = abs(ac[0]-bc[0]) <= ac[2]+bc[2]
+    ycol = abs(ac[1]-bc[1]) <= ac[3]+bc[3]
+    return (xcol and ycol)
+    
