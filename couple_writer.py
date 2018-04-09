@@ -5,22 +5,22 @@ import numpy as np
 from libtiff import TIFF
 
 # Write tile array to image file (16bit tiff)
-def couple_writer(tile, cnt, jx, jy, ch, level, coord, filepath, tilepath):
+def couple_writer(tile, cnt, jx, jy, ch, level, coord, filepath, tilepath, couplecfg):
     
     # Convert to unsigned 16bit integer
     utile = tile.astype('uint16')
+    ## Note: -1 = No Data, this should probably be taken into account later!
     
     #==========================================================#
     # Normalize image
     # We shouldn't be doing this in the final run, but it makes
     # it a lot easier to actually read the images, as the maxima
     # of most images are well below the maximum of 2^16
-    # utile = (utile * (2**16 / np.max(utile))).astype('uint16')
+    utilenorm = (utile * (2**16 / np.max(utile))).astype('uint16')
     #==========================================================#
     
     # Construct path and file strings
     dirpath, filename = os.path.split(filepath)
-    pathstr = '{}/{}/{}_{}/{}{}_{}'.format(tilepath, level, coord[0], coord[1], jx, jy, ch)
     try:
         # Use original filename (without PROBAV_ prefix and extension)
         # N.B.: couple_collect relies on these files to have the same
@@ -30,13 +30,26 @@ def couple_writer(tile, cnt, jx, jy, ch, level, coord, filepath, tilepath):
         print('Invalid file name pattern:\n' + filepath)
         return
     
-    # Create folder if it doesn't exist yet
-    if not os.path.exists(pathstr):
-        os.makedirs(pathstr)
+    pathstr = '{}/{}/{}_{}/{}{}_{}'.format(tilepath, level, coord[0], coord[1], jx, jy, ch)
+    pathstrorig = pathstr + couplecfg['origdir']
+    pathstrnorm = pathstr + couplecfg['normdir']
     
-    # Open image file and write
-    tiff = TIFF.open('{}/{}'.format(pathstr, filestr), mode='w')
+    # Create folder for original if it doesn't exist yet
+    if not os.path.exists(pathstrorig) and couplecfg['orig']:
+        os.makedirs(pathstrorig)
+        
+    # Create folder for normalized if it doesn't exist yet
+    if not os.path.exists(pathstrnorm) and couplecfg['norm']:
+        os.makedirs(pathstrnorm)
+        
+    # Open original image file and write
+    tiff = TIFF.open('{}/{}'.format(pathstrorig, filestr), mode='w')
     tiff.write_image(utile)
+    tiff.close()
+    
+    # Open original image file and write
+    tiff = TIFF.open('{}/{}'.format(pathstrnorm, filestr), mode='w')
+    tiff.write_image(utilenorm)
     tiff.close()
 
 
@@ -65,8 +78,9 @@ def couple_slicer(f, ind, couplecfg, cnt, coord, tilepath):
                         tile = fullimg[1][ iys[jy]:iys[jy+1], ixs[jx]:ixs[jx+1] ]
                         
                         # Ignore empty images
-                        if np.max(tile) > -1:
-                            couple_writer(tile, cnt, jx, jy, ch, level, coord, f.filename, tilepath)
+                        # Note: -1 = No Data
+                        if np.max(tile) > 0:
+                            couple_writer(tile, cnt, jx, jy, ch, level, coord, f.filename, tilepath, couplecfg)
                     
                 except (KeyError, RuntimeError):
                     print('Error when reading file:')
