@@ -21,5 +21,8 @@ wget-log*
 # The tilebackups folder
 /tilebackups
 
+# The manual selection of tiles folder
+/tilesmansel
+
 # Fuse hidden files
 .fuse_hidden*
