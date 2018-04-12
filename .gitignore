@@ -26,3 +26,6 @@ wget-log*
 
 # Fuse hidden files
 .fuse_hidden*
+
+# Temporary matlab files
+*.m~
