@@ -1,0 +1,3 @@
+[submodule "general-matlab-functions"]
+	path = general-matlab-functions
+	url = https://github.com/dedean16/general-matlab-functions
