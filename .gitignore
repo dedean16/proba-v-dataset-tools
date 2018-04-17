@@ -24,6 +24,9 @@ wget-log*
 # The manual selection of tiles folder
 /tilesmansel
 
+# The SR results folder
+/sr/results
+
 # Fuse hidden files
 .fuse_hidden*
 
