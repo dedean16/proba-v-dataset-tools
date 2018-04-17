@@ -27,6 +27,9 @@ wget-log*
 # The SR results folder
 /sr/results
 
+# All .mat files in /sr/**
+/sr/**/*.mat
+
 # Fuse hidden files
 .fuse_hidden*
 
