@@ -7,7 +7,7 @@ from libtiff import TIFF
 from videoquality.ssim import ssim_exact
 from videoquality.vifp import vifp_mscale
 
-from psnr import psnr
+from videoquality.psnr import psnr
 from paths import *
 
 # Iterate over subfolders in SR results folder
