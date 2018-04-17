@@ -12,11 +12,11 @@ from collect_wgetthread import *
 
 
 # Construct list of processed tiff files (full paths)
-pattern   = os.path.join(paths['tiles'], '**/*.tiff')
+pattern   = os.path.join(paths['tiles'], '**/*.tif')
 filepaths = glob.glob(pattern, recursive = True)
 
 # Construct set of unique HDF5 filenames and concatenate to single string
-fileset   = set(map(lambda x: ',*' + os.path.split(x)[1][:-5] + '.HDF5', filepaths))
+fileset   = set(map(lambda x: ',*' + os.path.split(x)[1][:-4] + '.HDF5', filepaths))
 filesdone = ''.join(fileset)
 
 # Parse optional argument 'all' for downloading all

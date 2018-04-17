@@ -25,7 +25,7 @@ def couple_writer(tile, cnt, jx, jy, ch, level, coord, filepath, tilepath, coupl
         # Use original filename (without PROBAV_ prefix and extension)
         # N.B.: couple_collect relies on these files to have the same
         #       name as the corresponding HDF5 files!
-        filestr = filename[7:-5] + '.tiff'
+        filestr = filename[7:-5] + '.tif'
     except:
         print('Invalid file name pattern:\n' + filepath)
         return

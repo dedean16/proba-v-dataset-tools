@@ -47,7 +47,7 @@ class wgetthread(Thread):
         sleep(0.3)  # Give wgetstatus some time to calculate data folder size
         
         # Fetch data using wget
-        call([wgetpath, '-r', '--user=' + username, '--password=' + password, '-P' + datapath, '-nH', '-q', '--reject=*.html*,*.tiff,*.png,*.pdf'+filesdone,  url])
+        call([wgetpath, '-r', '--user=' + username, '--password=' + password, '-P' + datapath, '-nH', '-q', '--reject=*.html*,*.tif,*.tiff,*.png,*.pdf'+filesdone,  url])
 
 
 # Threaded status terminal output
