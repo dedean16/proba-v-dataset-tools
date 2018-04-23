@@ -4,8 +4,10 @@ import os, re
 import numpy as np
 from libtiff import TIFF
 
+from couple_cfg import *
+
 # Write tile array to image file (16bit tiff)
-def couple_writer(tile, cnt, jx, jy, ch, level, coord, filepath, tilepath, couplecfg):
+def couple_writer(tile, cnt, jx, jy, ch, level, coord, filepath, tilepath):
     
     # Convert to unsigned 16bit integer
     utile = tile.astype('uint16')
@@ -42,17 +44,19 @@ def couple_writer(tile, cnt, jx, jy, ch, level, coord, filepath, tilepath, coupl
     if not os.path.exists(pathstrnorm) and couplecfg['norm']:
         os.makedirs(pathstrnorm)
         
-    # Open original image file and write
-    tiff = TIFF.open('{}/{}'.format(pathstrorig, filestr), mode='w')
-    tiff.write_image(utile)
-    tiff.close()
+    if couplecfg['orig']:
+        # Open original image file and write
+        tiff = TIFF.open('{}/{}'.format(pathstrorig, filestr), mode='w')
+        tiff.write_image(utile)
+        tiff.close()
+        
+    if couplecfg['norm']:
+        # Open original image file and write
+        tiff = TIFF.open('{}/{}'.format(pathstrnorm, filestr), mode='w')
+        tiff.write_image(utilenorm)
+        tiff.close()
+
     
-    # Open original image file and write
-    tiff = TIFF.open('{}/{}'.format(pathstrnorm, filestr), mode='w')
-    tiff.write_image(utilenorm)
-    tiff.close()
-
-
 # Slice tiles from HDF5 files
 # Iterate over tile indices and channels, and call couple_writer
 def couple_slicer(f, ind, couplecfg, cnt, coord, tilepath):
