@@ -8,7 +8,7 @@ clear; close all; clc
 SRType        = 'rbRobust';
 
 % Input file
-FileName      = 'imgset_dinges_orig.mat';
+FileName      = 'imgset_nile_ndvi_orig.mat';
 PathName      = './';
 SRsavepath    = './results/';
 SRsuffix      = '_SR';
@@ -75,14 +75,17 @@ end
 figscale = 1.3;
 
 % Show SR image
-imagesc(handles.HR);
-colormap('gray')
+HRshow = handles.HR(3:end-1, 4:end-1);
+imagesc(HRshow);
+% colormap('gray')
+colormap inferno
+colorbar
 title(sprintf('SR result - %s - %s', FileName, SRType),'Interpreter','none')
 
 % Resize figure
 fig = gcf;
 set(fig, 'Units', 'Normalized')
-set(gcf, 'Position', [0.30 0.15 0.40 0.70])
+set(gcf, 'Position', [0.25 0.13 0.50 0.76])
 
 %% Save SR image
 % Save SR image to file
