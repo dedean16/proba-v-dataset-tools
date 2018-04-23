@@ -908,31 +908,77 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
 figure(99);
 set(99, 'NumberTitle', 'off')
 set(99, 'Name', 'High Resolution Image')
-imshow(im_result);
+
+% imshow(im_result);
+
+%%% Added by Daniel Cox
+% Show SR result
+imagesc(im_result);
+colorbar
+colormap inferno
+title(sprintf('Nile | Registration: %s | SR: %s | %ix | Full',registration,reconstruction,factor))
+set(gcf, 'Units', 'Normalized')
+set(gcf, 'Position', [0.25 0.13 0.50 0.76])
+
+% Save SR result
+filename = sprintf('nile-sr-%s-%s-%ix', registration, reconstruction, factor);
+h = gcf;
+set(h,'Units','Inches');        % Set figure units to inches
+pos = get(h,'Position');        % Get figure positions in inches
+set(h,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
+print(h,filename,'-dpng','-r0') % Write to PNG file
+
+
+% Show SR result zoomed in
+imsize = size(im_result);
+x1 = 0.1; x2 = 0.35;
+y1 = 0.2; y2 = 0.45;
+
+ix1 = int32(x1 * imsize(2)); ix2 = int32(x2 * imsize(2));
+iy1 = int32(y1 * imsize(1)); iy2 = int32(y2 * imsize(1));
+
+figure(98);
+imagesc(im_result);
+xlim([ix1 ix2])
+ylim([iy1 iy2])
+colorbar
+colormap inferno
+title(sprintf('Nile | Registration: %s | SR: %s | %ix | x:%i-%i, y:%i-%i', registration, reconstruction, factor, ix1, ix2, iy1, iy2))
+set(gcf, 'Units', 'Normalized')
+set(gcf, 'Position', [0.25 0.13 0.50 0.76])
+
+% Save SR result zoomed in
+filename = sprintf('nile-sr-%s-%s-%ix-zoom', registration, reconstruction, factor);
+h = gcf;
+set(h,'Units','Inches');        % Set figure units to inches
+pos = get(h,'Position');        % Get figure positions in inches
+set(h,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
+print(h,filename,'-dpng','-r0') % Write to PNG file
+%%%
 
 
 % display parameters
-set(handles.rotationlist, 'String', phi_est);
-set(handles.shiftxlist, 'String', delta_est(:,1));
-set(handles.shiftylist, 'String', delta_est(:,2));
-set(handles.rotationlist, 'Enable', 'on');
-set(handles.shiftxlist, 'Enable', 'on');
-set(handles.shiftylist, 'Enable', 'on');
-
-PARAMETERSGIVENBYUSER{1} = phi_est;
-PARAMETERSGIVENBYUSER{2} = delta_est(:,1);
-PARAMETERSGIVENBYUSER{3} = delta_est(:,2);
-registration = 'manual';
-
-PARAMETERSWILLBEGIVEN = true;
-set(handles.popupmenu1, 'Enable', 'off');
-ISPARAMETERSGIVENBYUSER = true;
-set(handles.removeparameters, 'Enable', 'on');
-set(handles.radiobutton2, 'Value', 1.0);
+% set(handles.rotationlist, 'String', phi_est);
+% set(handles.shiftxlist, 'String', delta_est(:,1));
+% set(handles.shiftylist, 'String', delta_est(:,2));
+% set(handles.rotationlist, 'Enable', 'on');
+% set(handles.shiftxlist, 'Enable', 'on');
+% set(handles.shiftylist, 'Enable', 'on');
+% 
+% PARAMETERSGIVENBYUSER{1} = phi_est;
+% PARAMETERSGIVENBYUSER{2} = delta_est(:,1);
+% PARAMETERSGIVENBYUSER{3} = delta_est(:,2);
+% registration = 'manual';
+% 
+% PARAMETERSWILLBEGIVEN = true;
+% set(handles.popupmenu1, 'Enable', 'off');
+% ISPARAMETERSGIVENBYUSER = true;
+% set(handles.removeparameters, 'Enable', 'on');
+% set(handles.radiobutton2, 'Value', 1.0);
+%%% edited by Daniel Cox
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
