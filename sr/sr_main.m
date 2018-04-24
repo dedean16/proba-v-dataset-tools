@@ -1,4 +1,5 @@
 % Super Resolution - PROBA-V Dataset Tools
+% [Hanson 2007]
 % This script calls third party functions to perform superresolution
 clear; close all; clc
 
