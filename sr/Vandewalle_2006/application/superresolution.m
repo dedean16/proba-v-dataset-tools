@@ -915,48 +915,102 @@ set(99, 'Name', 'High Resolution Image')
 % imshow(im_result);
 
 %%% Added by Daniel Cox
+
+% setname = 'nile-ndvi';
+saveresult = true;
+setname = 'cropcircles-10RED';
+
+% Run quality measures on result
+im_result = im_result * 2^16;
+qmnames = {'MSE', 'PSNR', 'SSIM', 'MSSIM', 'VSNR', 'VIF', 'VIFP', 'UQI', 'IFC', 'NQM', 'WSNR', 'SNR'};
+orighr = double(imread([setname '-hr.tif']));
+qms = [];
+qmstr = '';
+
+for iqm = 1:length(qmnames)
+    qms(iqm) = metrix_mux(orighr, im_result, qmnames{iqm});
+    qmstr = sprintf('%s%5s = % .2e\n', qmstr, qmnames{iqm}, qms(iqm));
+end
+qmstr = qmstr(1:end-1);
+
+% Plot histograms of SR and HR
+% figure(90); hist(im_result(:), 50); title('SR Result')
+% figure(91); hist(orighr(:), 50); title('HR original')
+% figure(99)
+
 % Show SR result
-imagesc(im_result);
+im_cropped = im_result(1:end-3, 1:end-2);
+imagesc(im_cropped);
 colorbar
 colormap inferno
-title(sprintf('Nile | Registration: %s | SR: %s | %ix | Full',registration,reconstruction,factor))
+title(sprintf('%s | Registration: %s | SR: %s | %ix | Full', setname, registration, reconstruction, factor))
 set(gcf, 'Units', 'Normalized')
 set(gcf, 'Position', [0.25 0.13 0.50 0.76])
+text(10, 10, qmstr, 'BackgroundColor', 'White', 'VerticalAlignment', 'Top', 'FontSize', 12, 'FontName', 'fixed')
 
 % Save SR result
-filename = sprintf('nile-sr-%s-%s-%ix', registration, reconstruction, factor);
-h = gcf;
-set(h,'Units','Inches');        % Set figure units to inches
-pos = get(h,'Position');        % Get figure positions in inches
-set(h,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
-print(h,filename,'-dpng','-r0') % Write to PNG file
+if saveresult
+    filename = sprintf('%s-sr-%s-%s-%ix', setname, registration, reconstruction, factor);
+    h = gcf;
+    set(h,'Units','Inches');        % Set figure units to inches
+    pos = get(h,'Position');        % Get figure positions in inches
+    set(h,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
+    print(h,filename,'-dpng','-r0') % Write to PNG file
+end
 
 
 % Show SR result zoomed in
-imsize = size(im_result);
-x1 = 0.1; x2 = 0.35;
-y1 = 0.2; y2 = 0.45;
+imsize = size(im_cropped);
+x1 = 0.65; x2 = 0.9;
+y1 = 0.65; y2 = 0.9;
+% x1 = 0.1; x2 = 0.35;
+% y1 = 0.2; y2 = 0.45; 
 
 ix1 = int32(x1 * imsize(2)); ix2 = int32(x2 * imsize(2));
 iy1 = int32(y1 * imsize(1)); iy2 = int32(y2 * imsize(1));
 
 figure(98);
-imagesc(im_result);
+imagesc(im_cropped);
 xlim([ix1 ix2])
 ylim([iy1 iy2])
 colorbar
 colormap inferno
-title(sprintf('Nile | Registration: %s | SR: %s | %ix | x:%i-%i, y:%i-%i', registration, reconstruction, factor, ix1, ix2, iy1, iy2))
+title(sprintf('%s | Registration: %s | SR: %s | %ix | x:%i-%i, y:%i-%i', setname, registration, reconstruction, factor, ix1, ix2, iy1, iy2))
 set(gcf, 'Units', 'Normalized')
 set(gcf, 'Position', [0.25 0.13 0.50 0.76])
 
 % Save SR result zoomed in
-filename = sprintf('nile-sr-%s-%s-%ix-zoom', registration, reconstruction, factor);
-h = gcf;
-set(h,'Units','Inches');        % Set figure units to inches
-pos = get(h,'Position');        % Get figure positions in inches
-set(h,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
-print(h,filename,'-dpng','-r0') % Write to PNG file
+if saveresult
+    filename = sprintf('%s-sr-%s-%s-%ix-zoom', setname, registration, reconstruction, factor);
+    h = gcf;
+    set(h,'Units','Inches');        % Set figure units to inches
+    pos = get(h,'Position');        % Get figure positions in inches
+    set(h,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
+    print(h,filename,'-dpng','-r0') % Write to PNG file
+end
+
+
+% Show SR-HR difference^2
+figure(97);
+im_diffsq = (im_result - orighr).^2;
+imagesc(im_diffsq(1:end-2, 1:end-2));
+colorbar
+colormap viridis
+title(sprintf('%s | Registration: %s | SR: %s | %ix | \\Delta^2', setname, registration, reconstruction, factor))
+set(gcf, 'Units', 'Normalized')
+set(gcf, 'Position', [0.25 0.13 0.50 0.76])
+% text(10, 10, qmstr, 'BackgroundColor', 'White', 'VerticalAlignment', 'Top', 'FontSize', 12, 'FontName', 'fixed')
+
+% Save SR-HR difference^2 result
+if saveresult
+    filename = sprintf('%s-sr-%s-%s-%ix-diffsq', setname, registration, reconstruction, factor);
+    h = gcf;
+    set(h,'Units','Inches');        % Set figure units to inches
+    pos = get(h,'Position');        % Get figure positions in inches
+    set(h,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
+    print(h,filename,'-dpng','-r0') % Write to PNG file
+end
+
 %%%
 
 
