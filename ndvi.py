@@ -13,6 +13,12 @@ from couple_cfg import *
 def ndvi(nir, red):
     return (nir - red) / (nir + red)
 
+
+# Map NDVI index to range of [0, 2^16)]
+def ndvimap(ndviimg):
+    return (0.5 + 0.5 * ndviimg) * 2**16
+
+
 # Compute and write NDVI image files in the tiles directory
 def compute_ndvi_tiles():
     
@@ -36,8 +42,8 @@ def compute_ndvi_tiles():
         except:
             print('Error while attempting to open image files.\n')
             
-        # Compute NDVI image and check folder
-        imgndvi = ndvi(imgnir, imgred)              # Compute NDVI
+        # Compute NDVI image; map from [-1, +1] to [0, +1]
+        imgndvi = ndvimap( ndvi(imgnir, imgred) ).astype('float32')
         
         # Create folders
         ndvidirpath = os.path.dirname(ndvipath)
