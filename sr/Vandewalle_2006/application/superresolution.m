@@ -916,26 +916,40 @@ set(99, 'Name', 'High Resolution Image')
 
 %%% Added by Daniel Cox
 
-% setname = 'nile-ndvi';
-saveresult = true;
-setname = 'cropcircles-10RED';
+%=== Settings ===%
+setname = 'nile-10ndvi';
+% setname = 'cropcircles-10RED';
+saveresult = false;
+
+% x1 = 0.65; x2 = 0.9; y1 = 0.65; y2 = 0.9;   % Crop Circles [10_]
+x1 = 0.1; x2 = 0.35; y1 = 0.2; y2 = 0.45;   % Nile [10_]
+
+
+%================%
+% im_result = im_result * 2^16;
+% im_result = im_result * 2^32;
+
+% Read original HR image. SR result needs to be multiplied with 2^bitdepth
+% for some reason... (-_-)
+orighr = imread([setname '-hr.tif']);
+orighrinfo = imfinfo([setname '-hr.tif']);
+im_result = im_result * 2^orighrinfo.BitsPerSample;
+
 
 % Run quality measures on result
-im_result = im_result * 2^16;
 qmnames = {'MSE', 'PSNR', 'SSIM', 'MSSIM', 'VSNR', 'VIF', 'VIFP', 'UQI', 'IFC', 'NQM', 'WSNR', 'SNR'};
-orighr = double(imread([setname '-hr.tif']));
 qms = [];
 qmstr = '';
 
 for iqm = 1:length(qmnames)
-    qms(iqm) = metrix_mux(orighr, im_result, qmnames{iqm});
+    qms(iqm) = metrix_mux(double(orighr), im_result, qmnames{iqm});
     qmstr = sprintf('%s%5s = % .2e\n', qmstr, qmnames{iqm}, qms(iqm));
 end
 qmstr = qmstr(1:end-1);
 
 % Plot histograms of SR and HR
-% figure(90); hist(im_result(:), 50); title('SR Result')
-% figure(91); hist(orighr(:), 50); title('HR original')
+% figure(90); hist(im_result(:), 100); title('SR Result')
+% figure(91); hist(orighr(:), 100); title('HR original')
 % figure(99)
 
 % Show SR result
@@ -961,11 +975,6 @@ end
 
 % Show SR result zoomed in
 imsize = size(im_cropped);
-x1 = 0.65; x2 = 0.9;
-y1 = 0.65; y2 = 0.9;
-% x1 = 0.1; x2 = 0.35;
-% y1 = 0.2; y2 = 0.45; 
-
 ix1 = int32(x1 * imsize(2)); ix2 = int32(x2 * imsize(2));
 iy1 = int32(y1 * imsize(1)); iy2 = int32(y2 * imsize(1));
 
@@ -992,18 +1001,20 @@ end
 
 % Show SR-HR difference^2
 figure(97);
-im_diffsq = (im_result - orighr).^2;
+im_diffsq = abs(im_result - orighr);
 imagesc(im_diffsq(1:end-2, 1:end-2));
+xlim([ix1 ix2])
+ylim([iy1 iy2])
 colorbar
 colormap viridis
-title(sprintf('%s | Registration: %s | SR: %s | %ix | \\Delta^2', setname, registration, reconstruction, factor))
+title(sprintf('%s | Registration: %s | SR: %s | %ix | \\Delta', setname, registration, reconstruction, factor))
 set(gcf, 'Units', 'Normalized')
 set(gcf, 'Position', [0.25 0.13 0.50 0.76])
 % text(10, 10, qmstr, 'BackgroundColor', 'White', 'VerticalAlignment', 'Top', 'FontSize', 12, 'FontName', 'fixed')
 
 % Save SR-HR difference^2 result
 if saveresult
-    filename = sprintf('%s-sr-%s-%s-%ix-diffsq', setname, registration, reconstruction, factor);
+    filename = sprintf('%s-sr-%s-%s-%ix-diff', setname, registration, reconstruction, factor);
     h = gcf;
     set(h,'Units','Inches');        % Set figure units to inches
     pos = get(h,'Position');        % Get figure positions in inches
