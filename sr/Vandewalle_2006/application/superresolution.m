@@ -917,13 +917,17 @@ set(99, 'Name', 'High Resolution Image')
 %%% Added by Daniel Cox
 
 %=== Settings ===%
-setname = 'nile-10ndvi';
 % setname = 'cropcircles-10RED';
+setname = 'nile-10ndvi';
 saveresult = false;
+saveresult = true;
+
+simpleinterpolation = true;
 
 % x1 = 0.65; x2 = 0.9; y1 = 0.65; y2 = 0.9;   % Crop Circles [10_]
 x1 = 0.1; x2 = 0.35; y1 = 0.2; y2 = 0.45;   % Nile [10_]
 
+figposition = [0.3 0.18 0.35 0.55];
 
 %================%
 % im_result = im_result * 2^16;
@@ -942,7 +946,7 @@ qms = [];
 qmstr = '';
 
 for iqm = 1:length(qmnames)
-    qms(iqm) = metrix_mux(double(orighr), im_result, qmnames{iqm});
+    qms(iqm) = metrix_mux(double(orighr(4:end-4, 4:end-4)), im_result(4:end-4, 4:end-4), qmnames{iqm});
     qmstr = sprintf('%s%5s = % .2e\n', qmstr, qmnames{iqm}, qms(iqm));
 end
 qmstr = qmstr(1:end-1);
@@ -953,14 +957,15 @@ qmstr = qmstr(1:end-1);
 % figure(99)
 
 % Show SR result
-im_cropped = im_result(1:end-3, 1:end-2);
+im_cropped = im_result(4:end-4, 4:end-4);
 imagesc(im_cropped);
 colorbar
 colormap inferno
 title(sprintf('%s | Registration: %s | SR: %s | %ix | Full', setname, registration, reconstruction, factor))
 set(gcf, 'Units', 'Normalized')
-set(gcf, 'Position', [0.25 0.13 0.50 0.76])
+set(gcf, 'Position', figposition)
 text(10, 10, qmstr, 'BackgroundColor', 'White', 'VerticalAlignment', 'Top', 'FontSize', 12, 'FontName', 'fixed')
+drawnow; pause(0.1);
 
 % Save SR result
 if saveresult
@@ -986,7 +991,8 @@ colorbar
 colormap inferno
 title(sprintf('%s | Registration: %s | SR: %s | %ix | x:%i-%i, y:%i-%i', setname, registration, reconstruction, factor, ix1, ix2, iy1, iy2))
 set(gcf, 'Units', 'Normalized')
-set(gcf, 'Position', [0.25 0.13 0.50 0.76])
+set(gcf, 'Position', figposition)
+drawnow; pause(0.1);
 
 % Save SR result zoomed in
 if saveresult
@@ -1001,16 +1007,17 @@ end
 
 % Show SR-HR difference^2
 figure(97);
-im_diffsq = abs(im_result - orighr);
-imagesc(im_diffsq(1:end-2, 1:end-2));
+im_diff = abs(im_result - double(orighr));
+imagesc(im_diff(4:end-4, 4:end-4));
 xlim([ix1 ix2])
 ylim([iy1 iy2])
 colorbar
 colormap viridis
 title(sprintf('%s | Registration: %s | SR: %s | %ix | \\Delta', setname, registration, reconstruction, factor))
 set(gcf, 'Units', 'Normalized')
-set(gcf, 'Position', [0.25 0.13 0.50 0.76])
-% text(10, 10, qmstr, 'BackgroundColor', 'White', 'VerticalAlignment', 'Top', 'FontSize', 12, 'FontName', 'fixed')
+set(gcf, 'Position', figposition)
+text(10, 10, qmstr, 'BackgroundColor', 'White', 'VerticalAlignment', 'Top', 'FontSize', 12, 'FontName', 'fixed')
+drawnow; pause(0.1);
 
 % Save SR-HR difference^2 result
 if saveresult
@@ -1020,6 +1027,66 @@ if saveresult
     pos = get(h,'Position');        % Get figure positions in inches
     set(h,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
     print(h,filename,'-dpng','-r0') % Write to PNG file
+end
+
+
+if simpleinterpolation
+    
+    % Simple Interpolations of input image
+    global IMAGESDATA
+    imin1 = imread([IMAGESDATA(1).path IMAGESDATA(1).name]);
+    
+    % Interpolation names and keys
+    interpols(1).str  = 'nearest';
+    interpols(1).name = 'Nearest Neighbor';
+    interpols(2).str  = 'bilinear';
+    interpols(2).name = 'Bilinear Interpolation';
+    interpols(3).str  = 'bicubic';
+    interpols(3).name = 'Bicubic Interpolation';
+    
+    % Quality Metric keys
+    qmnames = {'MSE', 'PSNR', 'SSIM', 'MSSIM', 'VSNR', 'VIF', 'VIFP', 'UQI', 'IFC', 'NQM', 'WSNR', 'SNR'};
+    
+    % Iterate over interpolation methods
+    for intp = 1:length(interpols)
+        
+        imin1intp = imresize(imin1, factor, interpols(intp).str);
+    
+        % Run quality measures on result
+        qms = [];
+        qmstr = '';
+
+        for iqm = 1:length(qmnames)
+            qms(iqm) = metrix_mux(double(orighr(4:end-4, 4:end-4)), imin1intp(4:end-4, 4:end-4), qmnames{iqm});
+            qmstr = sprintf('%s%5s = % .2e\n', qmstr, qmnames{iqm}, qms(iqm));
+        end
+        qmstr = qmstr(1:end-1);
+
+        % Show image
+        figure(92+intp)
+        imagesc(imin1intp)
+        xlim([ix1 ix2])
+        ylim([iy1 iy2])
+        colormap inferno
+        colorbar
+        title(sprintf('%s | %s | %ix', setname, interpols(intp).name, factor))
+        set(gcf, 'Units', 'Normalized')
+        set(gcf, 'Position', figposition)
+        text(double(ix1)+4, double(iy1)+4, qmstr, 'BackgroundColor', 'White', 'VerticalAlignment', 'Top', 'FontSize', 12, 'FontName', 'fixed')
+        drawnow; pause(0.1);
+
+        % Save result
+        if saveresult
+            filename = sprintf('%s-simple-%s-%ix', setname, interpols(intp).str, factor);
+            h = gcf;
+            set(h,'Units','Inches');        % Set figure units to inches
+            pos = get(h,'Position');        % Get figure positions in inches
+            set(h,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
+            print(h,filename,'-dpng','-r0') % Write to PNG file
+        end
+        
+    end
+    
 end
 
 %%%
