@@ -843,190 +843,205 @@ if (size(size(IMAGES{1}), 2) == 3)
     im_color2 = imresize(cr_temp, factor, 'bicubic');    
 end
 
-% reconstruct high resolution image
-switch reconstruction
-    case 'interpolation'
-        filename2 = 'IN';
-        im_result = interpolation(im_part,delta_est,phi_est,factor);
-    case 'papoulis-gerchberg'
-        filename2 = 'PG';
-        im_result = papoulisgerchberg(im_part,delta_est,factor);
-    case 'iteratedBP'
-        filename2 = 'BP';
-        im_result = iteratedbackprojection(im_part, delta_est, phi_est, factor);
-    case 'robustSR'
-        filename2 = 'RS';
-        im_result = robustSR(im_part, delta_est, phi_est, factor);
-    case 'pocs'
-        filename2 = 'PO';
-        im_result = pocs(im_part,delta_est,factor);
-    case 'normConv'
-        correctNoise = get(handles.noise_checkbox, 'Value');
-        twoPass = get(handles.twopass_checkbox, 'Value');
-        filename2 = ['NC' num2str(correctNoise) num2str(twoPass)];
-        im_result = n_conv(im_part,delta_est,phi_est,factor,correctNoise,twoPass);%Last two parameters are booleans for: noiseCorrect and TwoPass
-    otherwise
-        errordlg('Unknown reconstruction technique');
-end
 
+%%%% Edited by Daniel Cox
 
-if (size(size(IMAGES{1}), 2) == 3)
-    temp_result_ycbcr(:,:,1) = im_result;
-    temp_result_ycbcr(:,:,2) = im_color1;
-    temp_result_ycbcr(:,:,3) = im_color2;
-    im_result = ycbcr2rgb(temp_result_ycbcr);
-end
+reconstructions = {};
+reconstructions = {'interpolation', 'papoulis-gerchberg', 'iteratedBP', 'robustSR', 'normConv'};
+recqm = [];
+irec = 0;
 
-%% Auto Save
-autoSave = get(handles.saveHR_checkbox,'Value');
-tempPath = get(handles.text14,'String');
+for irec = 1:length(reconstructions)
+    reconstruction = reconstructions{irec};
+    display(['Current reconstruction: ' reconstruction])
 
-if(autoSave)
-    if(DESTGIVEN2 && get(handles.radiobutton9, 'Value'))
-
-        for i = 1:99 % Check if file name already exist, and increment...
-            if(exist([tempPath '/' 'result_' filename1 '_' filename2 '_' num2str(i) '.tif'], 'file') == 0)
-                fileName = ['result_' filename1 '_' filename2 '_' num2str(i) '.tif'];
-                break
-            end
-        end
-        imwrite(im_result, [tempPath '/' fileName]);
-        
-    else
-        
-        for i = 1:99 % Check if file name already exist, and increment...
-            if(exist(['result_' filename1 '_' filename2 '_' num2str(i) '.tif'], 'file') == 0)
-                fileName = ['result_' filename1 '_' filename2 '_' num2str(i) '.tif'];
-                break
-            end
-        end
-        imwrite(im_result, fileName);
-        
+    % reconstruct high resolution image
+    switch reconstruction
+        case 'interpolation'
+            filename2 = 'IN';
+            im_result = interpolation(im_part,delta_est,phi_est,factor);
+        case 'papoulis-gerchberg'
+            filename2 = 'PG';
+            im_result = papoulisgerchberg(im_part,delta_est,factor);
+        case 'iteratedBP'
+            filename2 = 'BP';
+            im_result = iteratedbackprojection(im_part, delta_est, phi_est, factor);
+        case 'robustSR'
+            filename2 = 'RS';
+            im_result = robustSR(im_part, delta_est, phi_est, factor);
+        case 'pocs'
+            filename2 = 'PO';
+            im_result = pocs(im_part,delta_est,factor);
+        case 'normConv'
+            correctNoise = get(handles.noise_checkbox, 'Value');
+            twoPass = get(handles.twopass_checkbox, 'Value');
+            filename2 = ['NC' num2str(correctNoise) num2str(twoPass)];
+            im_result = n_conv(im_part,delta_est,phi_est,factor,correctNoise,twoPass);%Last two parameters are booleans for: noiseCorrect and TwoPass
+        otherwise
+            errordlg('Unknown reconstruction technique');
     end
-end
-%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-figure(99);
-set(99, 'NumberTitle', 'off')
-set(99, 'Name', 'High Resolution Image')
-
-% imshow(im_result);
-
-%%% Added by Daniel Cox
-
-%=== Settings ===%
-% setname = 'cropcircles-10RED';
-setname = 'nile-10ndvi';
-saveresult = false;
-saveresult = true;
-
-simpleinterpolation = true;
-
-% x1 = 0.65; x2 = 0.9; y1 = 0.65; y2 = 0.9;   % Crop Circles [10_]
-x1 = 0.1; x2 = 0.35; y1 = 0.2; y2 = 0.45;   % Nile [10_]
-
-figposition = [0.3 0.18 0.35 0.55];
-
-%================%
-% im_result = im_result * 2^16;
-% im_result = im_result * 2^32;
-
-% Read original HR image. SR result needs to be multiplied with 2^bitdepth
-% for some reason... (-_-)
-orighr = imread([setname '-hr.tif']);
-orighrinfo = imfinfo([setname '-hr.tif']);
-im_result = im_result * 2^orighrinfo.BitsPerSample;
 
 
-% Run quality measures on result
-qmnames = {'MSE', 'PSNR', 'SSIM', 'MSSIM', 'VSNR', 'VIF', 'VIFP', 'UQI', 'IFC', 'NQM', 'WSNR', 'SNR'};
-qms = [];
-qmstr = '';
+    if (size(size(IMAGES{1}), 2) == 3)
+        temp_result_ycbcr(:,:,1) = im_result;
+        temp_result_ycbcr(:,:,2) = im_color1;
+        temp_result_ycbcr(:,:,3) = im_color2;
+        im_result = ycbcr2rgb(temp_result_ycbcr);
+    end
 
-for iqm = 1:length(qmnames)
-    qms(iqm) = metrix_mux(double(orighr(4:end-4, 4:end-4)), im_result(4:end-4, 4:end-4), qmnames{iqm});
-    qmstr = sprintf('%s%5s = % .2e\n', qmstr, qmnames{iqm}, qms(iqm));
-end
-qmstr = qmstr(1:end-1);
+    %% Auto Save
+    autoSave = get(handles.saveHR_checkbox,'Value');
+    tempPath = get(handles.text14,'String');
 
-% Plot histograms of SR and HR
-% figure(90); hist(im_result(:), 100); title('SR Result')
-% figure(91); hist(orighr(:), 100); title('HR original')
-% figure(99)
+    if(autoSave)
+        if(DESTGIVEN2 && get(handles.radiobutton9, 'Value'))
 
-% Show SR result
-im_cropped = im_result(4:end-4, 4:end-4);
-imagesc(im_cropped);
-colorbar
-colormap inferno
-title(sprintf('%s | Registration: %s | SR: %s | %ix | Full', setname, registration, reconstruction, factor))
-set(gcf, 'Units', 'Normalized')
-set(gcf, 'Position', figposition)
-text(10, 10, qmstr, 'BackgroundColor', 'White', 'VerticalAlignment', 'Top', 'FontSize', 12, 'FontName', 'fixed')
-drawnow; pause(0.1);
+            for i = 1:99 % Check if file name already exist, and increment...
+                if(exist([tempPath '/' 'result_' filename1 '_' filename2 '_' num2str(i) '.tif'], 'file') == 0)
+                    fileName = ['result_' filename1 '_' filename2 '_' num2str(i) '.tif'];
+                    break
+                end
+            end
+            imwrite(im_result, [tempPath '/' fileName]);
 
-% Save SR result
-if saveresult
-    filename = sprintf('%s-sr-%s-%s-%ix', setname, registration, reconstruction, factor);
-    h = gcf;
-    set(h,'Units','Inches');        % Set figure units to inches
-    pos = get(h,'Position');        % Get figure positions in inches
-    set(h,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
-    print(h,filename,'-dpng','-r0') % Write to PNG file
-end
+        else
+
+            for i = 1:99 % Check if file name already exist, and increment...
+                if(exist(['result_' filename1 '_' filename2 '_' num2str(i) '.tif'], 'file') == 0)
+                    fileName = ['result_' filename1 '_' filename2 '_' num2str(i) '.tif'];
+                    break
+                end
+            end
+            imwrite(im_result, fileName);
+
+        end
+    end
+    %%
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    figure(99);
+    set(99, 'NumberTitle', 'off')
+    set(99, 'Name', 'High Resolution Image')
+
+    % imshow(im_result);
+
+    %%% Added by Daniel Cox
+
+    %=== Settings ===%
+    % setname = 'cropcircles-10RED';
+    setname = 'nile-10ndvi';
+    saveresult = false;
+    saveresult = true;
+
+    simpleinterpolation = true;
+
+    % x1 = 0.65; x2 = 0.9; y1 = 0.65; y2 = 0.9;   % Crop Circles [10_]
+    x1 = 0.1; x2 = 0.35; y1 = 0.2; y2 = 0.45;   % Nile [10_]
+
+    figposition = [0.3 0.18 0.35 0.55];
+
+    %================%
+    % im_result = im_result * 2^16;
+    % im_result = im_result * 2^32;
+
+    % Read original HR image. SR result needs to be multiplied with 2^bitdepth
+    % for some reason... (-_-)
+    orighr = imread([setname '-hr.tif']);
+    orighrinfo = imfinfo([setname '-hr.tif']);
+    im_result = im_result * 2^orighrinfo.BitsPerSample;
 
 
-% Show SR result zoomed in
-imsize = size(im_cropped);
-ix1 = int32(x1 * imsize(2)); ix2 = int32(x2 * imsize(2));
-iy1 = int32(y1 * imsize(1)); iy2 = int32(y2 * imsize(1));
+    % Run quality measures on result
+    qmnames = {'MSE', 'PSNR', 'SSIM', 'MSSIM', 'VSNR', 'VIF', 'VIFP', 'UQI', 'IFC', 'NQM', 'WSNR', 'SNR'};
+    qms = [];
+    qmstr = '';
 
-figure(98);
-imagesc(im_cropped);
-xlim([ix1 ix2])
-ylim([iy1 iy2])
-colorbar
-colormap inferno
-title(sprintf('%s | Registration: %s | SR: %s | %ix | x:%i-%i, y:%i-%i', setname, registration, reconstruction, factor, ix1, ix2, iy1, iy2))
-set(gcf, 'Units', 'Normalized')
-set(gcf, 'Position', figposition)
-drawnow; pause(0.1);
+    for iqm = 1:length(qmnames)
+        qms(iqm) = metrix_mux(double(orighr(4:end-4, 4:end-4)), im_result(4:end-4, 4:end-4), qmnames{iqm});
+        qmstr = sprintf('%s%5s = % .2e\n', qmstr, qmnames{iqm}, qms(iqm));
+    end
+    qmstr = qmstr(1:end-1);
+    
+    recqm(irec, :) = qms;
 
-% Save SR result zoomed in
-if saveresult
-    filename = sprintf('%s-sr-%s-%s-%ix-zoom', setname, registration, reconstruction, factor);
-    h = gcf;
-    set(h,'Units','Inches');        % Set figure units to inches
-    pos = get(h,'Position');        % Get figure positions in inches
-    set(h,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
-    print(h,filename,'-dpng','-r0') % Write to PNG file
-end
+    % Plot histograms of SR and HR
+    % figure(90); hist(im_result(:), 100); title('SR Result')
+    % figure(91); hist(orighr(:), 100); title('HR original')
+    % figure(99)
+
+    % Show SR result
+    im_cropped = im_result(4:end-4, 4:end-4);
+    imagesc(im_cropped);
+    colorbar
+    colormap inferno
+    title(sprintf('%s | Registration: %s | SR: %s | %ix | Full', setname, registration, reconstruction, factor))
+    set(gcf, 'Units', 'Normalized')
+    set(gcf, 'Position', figposition)
+    text(10, 10, qmstr, 'BackgroundColor', 'White', 'VerticalAlignment', 'Top', 'FontSize', 12, 'FontName', 'fixed')
+    drawnow; pause(0.1);
+
+    % Save SR result
+    if saveresult
+        filename = sprintf('%s-sr-%s-%s-%ix', setname, registration, reconstruction, factor);
+        h = gcf;
+        set(h,'Units','Inches');        % Set figure units to inches
+        pos = get(h,'Position');        % Get figure positions in inches
+        set(h,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
+        print(h,filename,'-dpng','-r0') % Write to PNG file
+    end
 
 
-% Show SR-HR difference^2
-figure(97);
-im_diff = abs(im_result - double(orighr));
-imagesc(im_diff(4:end-4, 4:end-4));
-xlim([ix1 ix2])
-ylim([iy1 iy2])
-colorbar
-colormap viridis
-title(sprintf('%s | Registration: %s | SR: %s | %ix | \\Delta', setname, registration, reconstruction, factor))
-set(gcf, 'Units', 'Normalized')
-set(gcf, 'Position', figposition)
-text(10, 10, qmstr, 'BackgroundColor', 'White', 'VerticalAlignment', 'Top', 'FontSize', 12, 'FontName', 'fixed')
-drawnow; pause(0.1);
+    % Show SR result zoomed in
+    imsize = size(im_cropped);
+    ix1 = int32(x1 * imsize(2)); ix2 = int32(x2 * imsize(2));
+    iy1 = int32(y1 * imsize(1)); iy2 = int32(y2 * imsize(1));
 
-% Save SR-HR difference^2 result
-if saveresult
-    filename = sprintf('%s-sr-%s-%s-%ix-diff', setname, registration, reconstruction, factor);
-    h = gcf;
-    set(h,'Units','Inches');        % Set figure units to inches
-    pos = get(h,'Position');        % Get figure positions in inches
-    set(h,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
-    print(h,filename,'-dpng','-r0') % Write to PNG file
+    figure(98);
+    imagesc(im_cropped);
+    xlim([ix1 ix2])
+    ylim([iy1 iy2])
+    colorbar
+    colormap inferno
+    title(sprintf('%s | Registration: %s | SR: %s | %ix | x:%i-%i, y:%i-%i', setname, registration, reconstruction, factor, ix1, ix2, iy1, iy2))
+    set(gcf, 'Units', 'Normalized')
+    set(gcf, 'Position', figposition)
+    drawnow; pause(0.1);
+
+    % Save SR result zoomed in
+    if saveresult
+        filename = sprintf('%s-sr-%s-%s-%ix-zoom', setname, registration, reconstruction, factor);
+        h = gcf;
+        set(h,'Units','Inches');        % Set figure units to inches
+        pos = get(h,'Position');        % Get figure positions in inches
+        set(h,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
+        print(h,filename,'-dpng','-r0') % Write to PNG file
+    end
+
+
+    % Show SR-HR difference^2
+    figure(97);
+    im_diff = abs(im_result - double(orighr));
+    imagesc(im_diff(4:end-4, 4:end-4));
+    xlim([ix1 ix2])
+    ylim([iy1 iy2])
+    colorbar
+    colormap viridis
+    title(sprintf('%s | Registration: %s | SR: %s | %ix | \\Delta', setname, registration, reconstruction, factor))
+    set(gcf, 'Units', 'Normalized')
+    set(gcf, 'Position', figposition)
+    text(10, 10, qmstr, 'BackgroundColor', 'White', 'VerticalAlignment', 'Top', 'FontSize', 12, 'FontName', 'fixed')
+    drawnow; pause(0.1);
+
+    % Save SR-HR difference^2 result
+    if saveresult
+        filename = sprintf('%s-sr-%s-%s-%ix-diff', setname, registration, reconstruction, factor);
+        h = gcf;
+        set(h,'Units','Inches');        % Set figure units to inches
+        pos = get(h,'Position');        % Get figure positions in inches
+        set(h,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
+        print(h,filename,'-dpng','-r0') % Write to PNG file
+    end
 end
 
 
@@ -1061,6 +1076,9 @@ if simpleinterpolation
             qmstr = sprintf('%s%5s = % .2e\n', qmstr, qmnames{iqm}, qms(iqm));
         end
         qmstr = qmstr(1:end-1);
+        
+        irec = irec+1;
+        recqm(irec, :) = qms;
 
         % Show image
         figure(92+intp)
@@ -1089,6 +1107,27 @@ if simpleinterpolation
     
 end
 
+
+% Write results of reconstruction to CSV file
+rownames = {reconstructions{:} interpols(:).str};
+fresult = fopen('sr-results.csv', 'w');
+
+% Write horizontal header
+for i = 1:length(qmnames)
+    fprintf(fresult, ',%s', qmnames{i});
+end
+
+% Write vertical header and data
+for j = 1:length(rownames)
+    
+    fprintf(fresult, '\n%s', rownames{j});
+    
+    for i = 1:length(qmnames)
+        fprintf(fresult, ',%f', recqm(j,i));
+    end
+end
+    
+fclose(fresult);
 %%%
 
 
