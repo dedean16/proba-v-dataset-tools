@@ -15,8 +15,9 @@ wget-log*
 # numpy data files
 *.npy
 
-# The tiles folder
+# The tiles folders
 /tiles
+/kelvinsset
 
 # The tilebackups folder
 /tilebackups

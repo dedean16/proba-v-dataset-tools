@@ -9,6 +9,7 @@ paths = {}
 datarelpath = '/../data'        # Points to data folder
 wgetrelpath = '/../wget/wget'   # Points to wget executable (Windows only)
 tilespath   = '/tiles'          # Points to tiles folder
+kelvinspath = '/kelvinsset'     # points to kelvinsset folder
 srresults   = '/sr/results'     # Points to SR results folder
 # Note: As wget is usually installed by default on Linux distros, it is assumed this command is present. paths.py deals with platform specific cases such as these.
 
@@ -17,6 +18,7 @@ srresults   = '/sr/results'     # Points to SR results folder
 repopath = os.path.dirname(__file__)
 paths['data'] = os.path.realpath(repopath + datarelpath)
 paths['tiles'] = os.path.realpath(repopath + tilespath)
+paths['kelvinsset'] = os.path.realpath(repopath + kelvinspath)
 paths['srresults'] = os.path.realpath(repopath + srresults)
 
 # Construct specific paths
