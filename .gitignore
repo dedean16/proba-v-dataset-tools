@@ -24,9 +24,13 @@ wget-log*
 # The manual selection of tiles folder
 /tilesmansel
 
-# The SR results and tests folder
+# The SR results
 /sr/results
 /sr/tests
+/sr/**/*.tif
+/sr/**/*.png
+/sr/**/*.csv
+/sr/**/*.ods
 
 # All .mat files in /sr/**
 /sr/**/*.mat
