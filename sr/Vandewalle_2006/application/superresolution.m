@@ -924,20 +924,20 @@ for irec = 1:length(reconstructions)
     set(99, 'NumberTitle', 'off')
     set(99, 'Name', 'High Resolution Image')
 
-    % imshow(im_result);
-
-    %%% Added by Daniel Cox
+    %%%% Added by Daniel Cox
 
     %=== Settings ===%
-    % setname = 'cropcircles-10RED';
-    setname = 'nile-10ndvi';
-    saveresult = false;
+    setname = 'cropcircles-10RED';
+%     setname = 'nile-10ndvi';
+    
+    x1 = 0.65; x2 = 0.9; y1 = 0.65; y2 = 0.9;   % Crop Circles [10_]
+%     x1 = 0.1; x2 = 0.35; y1 = 0.2; y2 = 0.45;   % Nile [10_]
+
+%     saveresult = false;
     saveresult = true;
 
+%     simpleinterpolation = false;
     simpleinterpolation = true;
-
-    % x1 = 0.65; x2 = 0.9; y1 = 0.65; y2 = 0.9;   % Crop Circles [10_]
-    x1 = 0.1; x2 = 0.35; y1 = 0.2; y2 = 0.45;   % Nile [10_]
 
     figposition = [0.3 0.18 0.35 0.55];
 
@@ -969,12 +969,12 @@ for irec = 1:length(reconstructions)
     % figure(90); hist(im_result(:), 100); title('SR Result')
     % figure(91); hist(orighr(:), 100); title('HR original')
     % figure(99)
-
+    
     % Show SR result
     im_cropped = im_result(4:end-4, 4:end-4);
     imagesc(im_cropped);
-    colorbar
     colormap inferno
+    colorbar
     title(sprintf('%s | Registration: %s | SR: %s | %ix | Full', setname, registration, reconstruction, factor))
     set(gcf, 'Units', 'Normalized')
     set(gcf, 'Position', figposition)
@@ -1001,8 +1001,8 @@ for irec = 1:length(reconstructions)
     imagesc(im_cropped);
     xlim([ix1 ix2])
     ylim([iy1 iy2])
-    colorbar
     colormap inferno
+    colorbar
     title(sprintf('%s | Registration: %s | SR: %s | %ix | x:%i-%i, y:%i-%i', setname, registration, reconstruction, factor, ix1, ix2, iy1, iy2))
     set(gcf, 'Units', 'Normalized')
     set(gcf, 'Position', figposition)
@@ -1025,8 +1025,8 @@ for irec = 1:length(reconstructions)
     imagesc(im_diff(4:end-4, 4:end-4));
     xlim([ix1 ix2])
     ylim([iy1 iy2])
-    colorbar
     colormap viridis
+    colorbar
     title(sprintf('%s | Registration: %s | SR: %s | %ix | \\Delta', setname, registration, reconstruction, factor))
     set(gcf, 'Units', 'Normalized')
     set(gcf, 'Position', figposition)
@@ -1042,6 +1042,30 @@ for irec = 1:length(reconstructions)
         set(h,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
         print(h,filename,'-dpng','-r0') % Write to PNG file
     end
+end
+
+
+if saveresult
+    % Show original HR
+    figure(92);
+    im_croppedhr = orighr(4:end-4, 4:end-4);
+    imagesc(im_croppedhr);
+    colormap inferno
+    colorbar
+    xlim([ix1 ix2])
+    ylim([iy1 iy2])
+    title(sprintf('%s | HR | x:%i-%i, y:%i-%i', setname, ix1, ix2, iy1, iy2))
+    set(gcf, 'Units', 'Normalized')
+    set(gcf, 'Position', figposition)
+    drawnow; pause(0.1);
+    
+    % Save original HR
+    filename = sprintf('%s-zoomed-hr', setname);
+    h = gcf;
+    set(h,'Units','Inches');        % Set figure units to inches
+    pos = get(h,'Position');        % Get figure positions in inches
+    set(h,'PaperPositionMode','Auto','PaperUnits','Inches','PaperSize',[pos(3), pos(4)])
+    print(h,filename,'-dpng','-r0') % Write to PNG file
 end
 
 
@@ -1083,10 +1107,10 @@ if simpleinterpolation
         % Show image
         figure(92+intp)
         imagesc(imin1intp)
-        xlim([ix1 ix2])
-        ylim([iy1 iy2])
         colormap inferno
         colorbar
+        xlim([ix1 ix2])
+        ylim([iy1 iy2])
         title(sprintf('%s | %s | %ix', setname, interpols(intp).name, factor))
         set(gcf, 'Units', 'Normalized')
         set(gcf, 'Position', figposition)
@@ -1110,14 +1134,17 @@ end
 
 % Write results of reconstruction to CSV file
 rownames = {reconstructions{:} interpols(:).str};
-fresult = fopen('sr-results.csv', 'w');
+fresult = fopen(sprintf('%s-%s-sr-qms.csv', setname, registration), 'w');
 
-% Write horizontal header
+% Write first cell
+fprintf(fresult, sprintf('%s - %s', setname, registration));
+
+% Write horizontal header: Quality Metrics
 for i = 1:length(qmnames)
     fprintf(fresult, ',%s', qmnames{i});
 end
 
-% Write vertical header and data
+% Write vertical header (SRs) and data (QM values)
 for j = 1:length(rownames)
     
     fprintf(fresult, '\n%s', rownames{j});
