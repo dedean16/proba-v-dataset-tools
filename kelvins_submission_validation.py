@@ -2,6 +2,8 @@ from zipfile import *
 from math import sqrt
 from libtiff import TIFF
 
+N = 3
+
 def RMSE(SR, HR):
     return sqrt(2)
 
@@ -21,5 +23,26 @@ def score(file):
 # if succesfull (no exception) score will be run later (by celery)
 # otherwise the text of the exception is shown on the web site (the user sees it) TEST IT PROPERLY
 def validate(file):
-    with ZipFile(file, 'r') as zipf:
-        pass
+    
+    # Open file as ZipFile
+    with ZipFile(file, 'r') as zf:
+        
+        # Check zip file corruption
+        ziptest = zf.testzip()
+        if ziptest != None:
+            raise ValueError('Corrupt file or header: ' + ziptest)
+        
+        # Build list of required files. Check against namelist. Throw error if files are missing.
+        contents = zf.namelist()
+        imgnamelist = map(lambda x: 'imgset{:02}SR.tif'.format(x), range(1, N+1))
+        imgnamesmissing = list(filter(lambda x: not(x in contents), imgnamelist))
+        
+        if len(imgnamesmissing) > 0:
+            raise ValueError('Files missing: ' + str(imgnamesmissing))
+        
+        # Open all content files as TIFFs
+        for cfname in contents:
+            cf = zf.open(cfname)
+            
+            print(type(cf))
+            
