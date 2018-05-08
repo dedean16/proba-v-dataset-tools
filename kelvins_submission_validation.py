@@ -1,3 +1,4 @@
+import os
 from zipfile import *
 import numpy as np
 from scipy.misc import imread
@@ -11,7 +12,10 @@ prefix = 'imgset'
 SRsuffix = 'SR.tif'
 HRsuffix = 'HR.tif'
 
-HRpath = './kelvinhr/'
+
+#=== Constructed values ===#
+dirpath, filename = os.path.split(__file__)
+HRpath = dirpath.replace('/uploads/competitions/', '/uploads/media/competitions/') + '/'
 
 
 #=== Functions ===#
