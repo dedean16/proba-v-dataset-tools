@@ -1,14 +1,34 @@
 from zipfile import *
-from math import sqrt
+import numpy as np
 from scipy.misc import imread
 
-N = 3
-dtype = 'uint16'
+#=== Parameters ===#
 shape = (768, 768)
+dtype = 'uint16'
+
+N = 3
+prefix = 'imgset'
+SRsuffix = 'SR.tif'
+HRsuffix = 'HR.tif'
+
+HRpath = './kelvinhr/'
 
 
+#=== Functions ===#
+
+# Generate list of numbered file names (starting with 1, max 99)
+def fnamelist(path, prefix, N, suffix):
+    return list(map(lambda x: '{}{}{:02}{}'.format(path, prefix, x, suffix), range(1, N+1)))
+
+
+# Compute Root Mean Square of Errors
 def RMSE(SR, HR):
-    return sqrt(2)
+    diff = np.float64(SR) - np.float64(HR)
+    return np.sqrt( np.square(diff).mean() )
+
+# Compute score term
+def scoreterm(SR, HR):
+    return np.exp( -RMSE(SR, HR) / 100 )  ### the 100 needs to be replaced by the average RMSE of bicubic
 
 # This return the score for the leaderboard
 # if there is an error an exception must be thrown here, but will not be visible to the user. Instead
@@ -17,9 +37,27 @@ def RMSE(SR, HR):
 # which case the first element is the score and the second the extra_info on the leaderboard
 def score(file):
     
-    # SR = TIFF.open(tiffiles[0], mode='r').read_image()
+    singlescores = [0]*N
     
-    return 0.02, 'extra_info'
+    # Open file as ZipFile
+    with ZipFile(file, 'r') as zf:
+        
+        HRimgpaths = fnamelist(HRpath, prefix, N, HRsuffix)
+        SRimgnames = fnamelist('',     prefix, N, SRsuffix)
+        
+        for i in range(N):      # Iterate over images
+            
+            # Open HR image and SR image
+            with open(HRimgpaths[i], 'rb') as HRf, zf.open(SRimgnames[i]) as SRf:
+                HRimg = imread(HRf)
+                SRimg = imread(SRf)
+                
+                # Calculate scoresum term
+                singlescores[i] = scoreterm(HRimg, SRimg)
+                
+    totscore = np.mean( singlescores )
+    
+    return totscore, 'extra_info'
 
 
 # This runs immmediately after the upload and validates the easy bits (format size etc.)
@@ -37,16 +75,16 @@ def validate(file):
         
         # Build list of required files. Check against namelist. Throw error if files are missing.
         contents = zf.namelist()
-        imgnamelist = map(lambda x: 'imgset{:02}SR.tif'.format(x), range(1, N+1))
-        imgnamesmissing = list(filter(lambda x: not(x in contents), imgnamelist))
+        imgnames = fnamelist('', prefix, N, SRsuffix)
+        imgnamesmissing = list(filter(lambda x: not(x in contents), imgnames))
         
         if len(imgnamesmissing) > 0:
             raise ValueError('Files missing: ' + str(imgnamesmissing))
         
         # Open all content files as images
-        for cfname in contents:
-            with zf.open(cfname) as cf:
-                img = imread(cf)
+        for SRfname in contents:
+            with zf.open(SRfname) as SRf:
+                img = imread(SRf)
 
                 # Check datatype
                 if img.dtype != dtype:
