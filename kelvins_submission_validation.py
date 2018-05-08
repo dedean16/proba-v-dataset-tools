@@ -1,8 +1,11 @@
 from zipfile import *
 from math import sqrt
-from libtiff import TIFF
+from scipy.misc import imread
 
 N = 3
+dtype = 'uint16'
+shape = (768, 768)
+
 
 def RMSE(SR, HR):
     return sqrt(2)
@@ -40,9 +43,15 @@ def validate(file):
         if len(imgnamesmissing) > 0:
             raise ValueError('Files missing: ' + str(imgnamesmissing))
         
-        # Open all content files as TIFFs
+        # Open all content files as images
         for cfname in contents:
-            cf = zf.open(cfname)
-            
-            print(type(cf))
-            
+            with zf.open(cfname) as cf:
+                img = imread(cf)
+
+                # Check datatype
+                if img.dtype != dtype:
+                    raise ValueError('Wrong datatype: {}. Required datatype: {}'.format(img.dtype, dtype))
+                    
+                # Check resolution
+                if img.shape != shape:
+                    raise ValueError('Wrong resolution: {}. Required resolution: {}'.format(img.shape, shape))
