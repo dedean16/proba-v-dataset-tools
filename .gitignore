@@ -33,6 +33,9 @@ wget-log*
 /sr/**/*.csv
 /sr/**/*.ods
 
+# The submission-tests folder
+/submission-tests
+
 # All .mat files in /sr/**
 /sr/**/*.mat
 
