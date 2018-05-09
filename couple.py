@@ -6,7 +6,6 @@ with warnings.catch_warnings():
     warnings.simplefilter('ignore')
     import h5py
 
-import sys
 from progress.bar import IncrementalBar
 
 from paths import *
@@ -22,9 +21,6 @@ from couple_writer import *
 CC, nfiles = couplepaths(coords, mapcfg)
 
 targetpath = paths['tiles']
-if 'kelvinmode' in sys.argv[1:]:
-    targetpath = paths['kelvinsset']
-
 print('Target path: {}'.format(targetpath))
 
 # Initialise file counter, progress bar and processed coords list
@@ -44,8 +40,8 @@ for C in CC:
             with h5py.File(filepath, 'r') as f:                 # Open HDF5 file
                 
                 # Find tile coords, Slice tiles and write files
-                ind = couple_indexer(f, coord, couplecfg)
-                couple_slicer(f, ind, couplecfg, cnt, coord, targetpath)
+                ind = couple_indexer(f, coord)
+                couple_slicer(f, ind, cnt, coord, targetpath)
                 
                 # Finish up iteration
                 cnt += 1                        # Count processed files

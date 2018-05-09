@@ -2,7 +2,10 @@
 
 from extra_math import *
 
-def couple_indexer(f, coord, couplecfg):
+from couple_cfg import *
+
+
+def couple_indexer(f, coord):
     
     # Fetch sizes
     nlon = f['lon'].shape[0]

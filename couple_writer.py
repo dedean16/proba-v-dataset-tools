@@ -36,6 +36,7 @@ def couple_writer(tile, cnt, jx, jy, ch, level, coord, filepath, targetpath):
     pathstrorig = pathstr + couplecfg['origdir']
     pathstrnorm = pathstr + couplecfg['normdir']
     
+    
     # Create folder for original if it doesn't exist yet
     if not os.path.exists(pathstrorig) and couplecfg['orig']:
         os.makedirs(pathstrorig)
@@ -43,23 +44,21 @@ def couple_writer(tile, cnt, jx, jy, ch, level, coord, filepath, targetpath):
     # Create folder for normalized if it doesn't exist yet
     if not os.path.exists(pathstrnorm) and couplecfg['norm']:
         os.makedirs(pathstrnorm)
+    
+    
+    if couplecfg['orig']:           # Open original image file and write
+        with TIFF.open('{}/{}'.format(pathstrorig, filestr), mode='w') as tiff:
+            tiff.write_image(utile)
         
-    if couplecfg['orig']:
-        # Open original image file and write
-        tiff = TIFF.open('{}/{}'.format(pathstrorig, filestr), mode='w')
-        tiff.write_image(utile)
-        tiff.close()
-        
-    if couplecfg['norm']:
-        # Open original image file and write
-        tiff = TIFF.open('{}/{}'.format(pathstrnorm, filestr), mode='w')
-        tiff.write_image(utilenorm)
-        tiff.close()
+    if couplecfg['norm']:           # Open normalized image file and write
+        with TIFF.open('{}/{}'.format(pathstrnorm, filestr), mode='w') as tiff:
+            tiff.write_image(utilenorm)
 
+    
     
 # Slice tiles from HDF5 files
 # Iterate over tile indices and channels, and call couple_writer
-def couple_slicer(f, ind, couplecfg, cnt, coord, targetpath):
+def couple_slicer(f, ind, cnt, coord, targetpath):
     
     # Determine level type
     try:
@@ -84,7 +83,7 @@ def couple_slicer(f, ind, couplecfg, cnt, coord, targetpath):
                         # Ignore empty images
                         # Note: -1 = No Data
                         if np.max(tile) > 0:
-                            couple_writer(tile, cnt, jx, jy, ch, level, coord, f.filename, targetpath, couplecfg)
+                            couple_writer(tile, cnt, jx, jy, ch, level, coord, f.filename, targetpath)
                     
                 except (KeyError, RuntimeError):
                     print('Error when reading file:')
