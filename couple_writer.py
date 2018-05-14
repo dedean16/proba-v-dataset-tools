@@ -106,10 +106,14 @@ def couple_slicer(f, ind, hdfcnt, coord, targetpath):
                 qmask = f[level + couplecfg['qualitychannel']]
                 qtile = qmask[ iys[jy]:iys[jy+1], ixs[jx]:ixs[jx+1] ]
                 
-                # Extract 'clear' bits and construct boolean image
+                # Prepare True and False base images
                 T = np.full(qtile.shape, True)
                 F = np.full(qtile.shape, False)
-                cleartile = np.where( (qtile & 0b111) == 0b000, T, F )
+
+                # Extract 'clear' and good bits and construct boolean image
+                # Note: (x & binarynum) allows 'selection' of relevant bits: 1 -> 'select'
+                #       and (x == binarynum) evaluates those bits. 0 for 'unselected' bits.
+                cleartile = np.where( (qtile & 0b1100111) == 0b1100000, T, F )
                 
                 # If sufficient clear pixels, write images
                 if cleartile.sum() / cleartile.size > couplecfg['min_clearance']:
