@@ -24,7 +24,8 @@ targetpath = paths['tiles']
 print('Target path: {}'.format(targetpath))
 
 # Initialise file counter, progress bar and processed coords list
-cnt = 0
+hdfcnt = 0                                      # HDF file counter
+imgcnt = 0                                      # Written image file counter
 bar = IncrementalBar('Processing files... ETA: %(eta)ds', max=nfiles, width=25)
 fileerror = False
 
@@ -41,10 +42,10 @@ for C in CC:
                 
                 # Find tile coords, Slice tiles and write files
                 ind = couple_indexer(f, coord)
-                couple_slicer(f, ind, cnt, coord, targetpath)
+                imgcnt += couple_slicer(f, ind, hdfcnt, coord, targetpath)
                 
                 # Finish up iteration
-                cnt += 1                        # Count processed files
+                hdfcnt += 1                     # Count processed files
                 bar.next()                      # Show progress bar
                 
         # Break out of loops in case of file error
@@ -55,7 +56,7 @@ for C in CC:
     
     if fileerror: break
 
-bar.finish()                                # Finish progress bar
+bar.finish()                                    # Finish progress bar
 
 # Report done if no error occurred
-if not fileerror: print('Done processing {} files.'.format(nfiles))
+if not fileerror: print('Done processing {} files. Wrote {} image files.'.format(nfiles, imgcnt))
