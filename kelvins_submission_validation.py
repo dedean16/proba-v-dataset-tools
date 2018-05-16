@@ -1,7 +1,9 @@
 import os
 from zipfile import *
+
 import numpy as np
-from scipy.misc import imread
+
+from pngtools import readgreypng
 
 #=== Parameters ===#
 shape = (768, 768)
@@ -53,8 +55,8 @@ def score(file):
             
             # Open HR image and SR image
             with open(HRimgpaths[i], 'rb') as HRf, zf.open(SRimgnames[i]) as SRf:
-                HRimg = imread(HRf)
-                SRimg = imread(SRf)
+                HRimg = readgreypng(HRf)
+                SRimg = readgreypng(SRf)
                 
                 # Calculate scoresum term
                 singlescores[i] = scoreterm(HRimg, SRimg)
@@ -88,7 +90,7 @@ def validate(file):
         # Open all content files as images
         for SRfname in contents:
             with zf.open(SRfname) as SRf:
-                img = imread(SRf)
+                img = readgreypng(SRf)
 
                 # Check datatype
                 if img.dtype != dtype:
