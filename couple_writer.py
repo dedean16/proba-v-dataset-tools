@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
-import os, re
+import os
 import numpy as np
-from libtiff import TIFF
 
-import png
-
+from custom_functions import ensure_folders_if
 from couple_cfg import *
+from pngtools import writegreypng
 
 
 def file_error_exit(f):
@@ -16,23 +15,14 @@ def file_error_exit(f):
     exit()
 
 
-# Write tile array to image file (16bit tiff)
+# Write tile array to image file (16bit png) or quality mask (boolean)
 def couple_writer(tile, hdfcnt, jx, jy, ch, level, coord, filepath, targetpath, dtype):
     
-    notbool = (dtype != 'bool_')
+    isbool = (dtype == 'bool')          # Is image of datatype boolean
+    utile = tile.astype(dtype)          # Convert image to uint16 or boolean
     
-    # Convert to unsigned 16bit integer
-    utile = tile.astype(dtype)
-    ## Note: -1 = No Data, this should probably be taken into account later!
-    
-    #==========================================================#
-    # Normalize image
-    # We shouldn't be doing this in the final run, but it makes
-    # it a lot easier to actually read the images, as the maxima
-    # of most images are well below the maximum of 2^16
-    if notbool:
+    if not(isbool):                     # Normalize 16-bit images
         utilenorm = (utile * (2**16 / np.max(utile))).astype('uint16')
-    #==========================================================#
     
     # Construct path and file strings
     dirpath, filename = os.path.split(filepath)
@@ -40,49 +30,35 @@ def couple_writer(tile, hdfcnt, jx, jy, ch, level, coord, filepath, targetpath, 
         # Use original filename (without PROBAV_ prefix and extension)
         # N.B.: couple_collect relies on these files to have the same
         #       name as the corresponding HDF5 files!
-        filestr = filename[7:-5]
+        filestr = filename[7:-5] + '.png'
     except:
         print('Invalid file name pattern:\n' + filepath)
         return
     
+    # Construct path strings
     pathstr = '{}/{}/{}_{}/{}{}_{}'.format(targetpath, level, coord[0], coord[1], jx, jy, ch)
     pathstrorig = pathstr + couplecfg['origdir']
     pathstrnorm = pathstr + couplecfg['normdir']
+    filepathstrorig = '{}/{}'.format(pathstrorig, filestr)
+    filepathstrnorm = '{}/{}'.format(pathstrnorm, filestr)
+    
+    # Create folders if required
+    ensure_folders_if(pathstrorig, couplecfg['orig'])
+    ensure_folders_if(pathstrnorm, couplecfg['norm'] and not isbool)
+    
+    #=== Write images ===#
+    if isbool:                          # Write boolean image (quality mask)
+        writegreypng(utile, filepathstrorig)
+    else:
+        if couplecfg['orig']:           # Write originally scaled image file
+            writegreypng(utile, filepathstrorig)
+            
+        if couplecfg['norm']:           # Write normalized image file
+            writegreypng(utilenorm, filepathstrnorm)
     
     
-    # Create folder for original if it doesn't exist yet
-    if not os.path.exists(pathstrorig) and couplecfg['orig']:
-        os.makedirs(pathstrorig)
-        
-    # Create folder for normalized if it doesn't exist yet
-    if not os.path.exists(pathstrnorm) and couplecfg['norm'] and notbool:
-        os.makedirs(pathstrnorm)
     
-    
-    if couplecfg['orig'] and notbool:   # Open original image file and write
-        tiff = TIFF.open('{}/{}.tif'.format(pathstrorig, filestr), mode='w')
-        tiff.write_image(utile)
-        tiff.close()
-        
-    if couplecfg['norm'] and notbool:   # Open normalized image file and write
-        tiff = TIFF.open('{}/{}.tif'.format(pathstrnorm, filestr), mode='w')
-        tiff.write_image(utilenorm)
-        tiff.close()
-    
-    
-    if not(notbool):
-        # print(type(utile))
-        # tiff = Image.fromarray(utile)
-        # tiff.save('{}/{}'.format(pathstr, filestr))
-        
-        imgres = utile.shape
-        with open('{}/{}.png'.format(pathstrorig, filestr), 'wb') as f:
-            w = png.Writer(imgres[1], imgres[0], greyscale=True, bitdepth=1)
-            w.write(f, utile)
-
-    
-    
-# Slice tiles from HDF5 files
+#=== Slice tiles from HDF5 files ===#
 # Iterate over tile indices and channels, and call couple_writer
 def couple_slicer(f, ind, hdfcnt, coord, targetpath):
     
@@ -131,7 +107,7 @@ def couple_slicer(f, ind, hdfcnt, coord, targetpath):
                         
                     
                     # Write 'clearance' boolean image to file
-                    couple_writer(cleartile, hdfcnt, jx, jy, 'QMASK', level, coord, f.filename, targetpath, 'bool_')
+                    couple_writer(cleartile, hdfcnt, jx, jy, 'QMASK', level, coord, f.filename, targetpath, 'bool')
                     imgcnt += 1
                     
             except (KeyError, RuntimeError):

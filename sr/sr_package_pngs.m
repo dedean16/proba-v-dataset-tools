@@ -21,7 +21,7 @@ for i = 1:length(filelist)                  % Iterate over files in imgdir
         ext = f.name(end-3:end);            % File extension
         
         % TIFF files only
-        if (strcmp(ext, 'tiff') || strcmp(ext, '.tif'))...
+        if strcmp(ext, '.png')...
                 && ~isempty(strfind(f.name, '_333M_'))
             
             if ndvimode

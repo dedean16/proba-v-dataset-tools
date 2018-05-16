@@ -9,8 +9,8 @@ dtype = 'uint16'
 
 N = 3
 prefix = 'imgset'
-SRsuffix = 'SR.tif'
-HRsuffix = 'HR.tif'
+SRsuffix = 'SR.png'
+HRsuffix = 'HR.png'
 
 
 #=== Constructed values ===#

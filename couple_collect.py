@@ -11,8 +11,8 @@ from collect_credentials import *
 from collect_wgetthread import *
 
 
-# Construct list of processed tiff files (full paths)
-pattern   = os.path.join(paths['tiles'], '**/*.tif')
+# Construct list of processed PNG files (full paths)
+pattern   = os.path.join(paths['tiles'], '**/*.png')
 filepaths = glob.glob(pattern, recursive = True)
 
 # Construct set of unique HDF5 filenames and concatenate to single string

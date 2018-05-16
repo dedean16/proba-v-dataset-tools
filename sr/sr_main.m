@@ -90,11 +90,9 @@ set(gcf, 'Position', [0.25 0.13 0.50 0.76])
 
 %% Save SR image
 % Save SR image to file
-imwrite(uint16(handles.HR), [SRsavepath FileName(1:end-4) SRsuffix '.tif']);
+imwrite(uint16(handles.HR), [SRsavepath FileName(1:end-4) SRsuffix '.png']);
 
 if savenorm     % Save normalized SR image to file (for the humans)
     HRnorm = uint8(handles.HR * 255/max(handles.HR(:)));
-    imwrite(HRnorm, [SRsavepath FileName(1:end-4) SRsuffix '_norm.tif'])
+    imwrite(HRnorm, [SRsavepath FileName(1:end-4) SRsuffix '_norm.png'])
 end;
-
-

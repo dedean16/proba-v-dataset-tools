@@ -21,7 +21,7 @@ from couple_writer import *
 CC, nfiles = couplepaths(coords, mapcfg)
 
 targetpath = paths['tiles']
-print('Target path: {}'.format(targetpath))
+print('Target path:\n{}'.format(targetpath))
 
 # Initialise file counter, progress bar and processed coords list
 hdfcnt = 0                                      # HDF file counter

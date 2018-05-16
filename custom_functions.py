@@ -31,3 +31,9 @@ def sizestr(sizebytes, sep='', signif=3):
         return '{}{}GB'.format(maybeint(roundbytes/10**9), sep)
     else:
         return '{}{}TB'.format(maybeint(roundbytes/10**12), sep)
+    
+
+# Create folders if required and if conditions are True
+def ensure_folders_if(path, condition=True):
+    if not os.path.exists(path) and condition:
+        os.makedirs(path)
