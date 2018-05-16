@@ -4,6 +4,10 @@
 # Python compiler cache
 **/__pycache__/**
 
+# Kelvins test files
+/imgset??HR.png
+/submission-test.zip
+
 # Generated map images
 /map/img/**
 !/map/img/equirectmap-1024-bw.jpg
