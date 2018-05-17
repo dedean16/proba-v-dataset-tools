@@ -4,13 +4,13 @@ PROBA-V Python Data Tool collection for testing Super Resolution algorithms on P
 ## Tools:
 - `[COLLECT]:` Downloads PROBA-V satellite images from the website with `wget`.
 - `[MAP]:` Generates a map that shows the contents of the dataset in a clear overview.
-- `[COUPLE]:` Sorts out corresponding 100m and 300m downloaded data
-- `[FILTER]:` Filters images to construct a smaller subset containing all features/cases important for testing super resolution.
-- `[SR]:` The Super Resolution algorithm(s).
-- `[DELTA]` Measure for differences in the multiple frames used for the Super Resolution algorithm.
-- `[METRIC]` Quality metric of the SR algorithm performance.
+- `[COUPLE]:` Sorts out corresponding 100m and 300m downloaded data. Filters by cloud coverage.
+- `[NDVI]:` Computes NDVI images from RED and NIR channels.
+- `[SR]:` The Super Resolution algorithm(s). (Third party Matlab scripts.)
+- `[KELVINS]:` Functions for validation and scoring on the Kelvins website.
+- `[BUILD]:` Build dataset from the coupled images. Computes bicubic interpolation scores.
 
 ## Requirements
-- Python 3
-- Python libraries: h5py, numpy, Pillow, libtiff, progress
+- Python 3.5+
+- Python libraries: h5py, numpy, Pillow, PyPNG, scikit-image and progress
 - wget
