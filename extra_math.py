@@ -3,6 +3,8 @@
 
 from math import log10
 
+from numpy import float64, square, sqrt
+
 # Construct a 1D linear function (y=a*x+b), based on two points
 def linefunc(X1, X2, Y1, Y2):
     a = (Y2-Y1) / (X2-X1)
@@ -37,4 +39,8 @@ def rectcoll(a, b):
     xcol = abs(ac[0]-bc[0]) <= ac[2]+bc[2]
     ycol = abs(ac[1]-bc[1]) <= ac[3]+bc[3]
     return (xcol and ycol)
-    
+
+# Compute Root Mean Square of Errors
+def RMSE(SR, HR):
+    sqerr = square(float64(SR) - float64(HR))
+    return sqrt(sqerr.mean())

@@ -3,6 +3,7 @@ from zipfile import *
 
 import numpy as np
 
+from extra_math import RMSE
 from pngtools import readgreypng
 
 #=== Parameters ===#
@@ -26,11 +27,6 @@ HRpath = dirpath.replace('/uploads/competitions/', '/uploads/media/competitions/
 def fnamelist(path, prefix, N, suffix):
     return list(map(lambda x: '{}{}{:02}{}'.format(path, prefix, x, suffix), range(1, N+1)))
 
-
-# Compute Root Mean Square of Errors
-def RMSE(SR, HR):
-    diff = np.float64(SR) - np.float64(HR)
-    return np.sqrt( np.square(diff).mean() )
 
 # Compute score term
 def scoreterm(SR, HR):
