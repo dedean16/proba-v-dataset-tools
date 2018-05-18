@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
+"""Run the Kelvins validation and score functions locally, for testing."""
 # Script to test the script kelvins_submission_validation
 
-from zipfile import ZipFile
-from kelvins_submission_validation import *
+from kelvins_submission_validation import validate, score
 
 zippath = 'submission-test.zip'
 
@@ -10,6 +10,6 @@ zippath = 'submission-test.zip'
 with open(zippath, 'rb') as file:
     print('Validation')
     print(validate(file))
-    
+
     print('\nScore')
     print(score(file))
