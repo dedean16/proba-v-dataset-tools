@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """couple_indexer -- Calculate pixel indices for tile in HDF5 file."""
 
+from numpy import arange
+
 from extra_math import linefunc
 from couple_cfg import couplecfg
 
@@ -24,18 +26,21 @@ def couple_indexer(f, coord):
     # === Calculate tile pixel coordinates === #
     # Several image tiles can be extracted from a single location
 
-    # Fetch tiling configuration variables
-    ch = couplecfg['chunksize']
-    ntx = couplecfg['ntilesx']
-    nty = couplecfg['ntilesy']
+    if '_100M_' in f.filename:
+        scale = couplecfg['scaleHR']
+    else:
+        scale = 1
 
-    # Calculate lower left corner
-    startlon = coord[1] - (ntx * ch) / 2
-    startlat = coord[0] - (nty * ch) / 2
+    # Fetch tiling configuration variables and compute center indices
+    chk = couplecfg['chunksizeLR'] * scale
+    nitx = couplecfg['ntilesx'] + 1             # Tile corners num of x indices
+    nity = couplecfg['ntilesy'] + 1             # Tile corners num of y indices
+    cx = int(lon2x(coord[1]))                   # Center x index
+    cy = int(lat2y(coord[0]))                   # Center y index
 
     # Calculate tile corner pixel coordinates, and sort
-    ixs = [int(lon2x(startlon + tx*ch)) for tx in range(ntx)]
-    iys = [int(lat2y(startlat + ty*ch)) for ty in range(nty)]
+    ixs = [int(cx + tx*chk) for tx in arange(-nitx/2, nitx/2)]
+    iys = [int(cy + ty*chk) for ty in arange(-nity/2, nity/2)]
 
     # Indices can become negative if the target coordinate
     # is at the boundary of the satellite image.

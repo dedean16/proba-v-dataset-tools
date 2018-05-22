@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
+"""Configuration of Couple parameters."""
 
 couplecfg = {}
 
-couplecfg['chunksize'] = 0.762      # chunksize for images (degrees)
-# couplecfg['chunksize'] = 256      # Chunksize for LR (300m) images in pixels
+couplecfg['chunksizeLR'] = 256      # Chunksize for LR (300m) images in pixels
+couplecfg['scaleHR'] = 3            # Scale of HR/LR
 
 # Number of image tiles to extract from location
 couplecfg['ntilesx'] = 3            # x direction
@@ -22,3 +23,10 @@ couplecfg['origdir'] = '/orig'      # Subfolder name for original images
 
 # Minimum fraction of clear pixels (no clouds, ice, etc...)
 couplecfg['min_clearance'] = 0.8
+
+
+# === Checks === #
+if couplecfg['chunksizeLR'] % 2 != 0 \
+            or couplecfg['chunksizeLR'] <= 0 \
+            or type(couplecfg['chunksizeLR']) != int:
+    raise ValueError('couple_cfg: chunksizeLR must be positive even integer.')
