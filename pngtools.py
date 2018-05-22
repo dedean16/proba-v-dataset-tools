@@ -47,14 +47,17 @@ def writegreypng(array, path):
 def readgreypng(path):
     """Read greyscale PNG to numpy array. Accepts 1-, 8- and 16-bit."""
     # Read data, determine bitdepth and datatype
-    pngdata = png.Reader(path).asDirect()           # Read PNG data
+    pngdata = png.Reader(path).read()               # Read PNG data
     bitdepth = pngdata[3]['bitdepth']               # Get bitdepth
     dataclass = getattr(np, depth2type[bitdepth])   # Get dataclass
+
+    if not pngdata[3]['greyscale']:
+        raise ValueError('Not a greyscale image.')
 
     # Check for valid bitdepth
     if bitdepth not in depth2type:
         raise ValueError('Accepted bit depths: {}. Given: {}'.format(
                             list(depth2type.keys()), bitdepth))
 
-    array = np.vstack(map(dataclass, pngdata[2]))   # Load into numpy array
+    array = np.array(list(pngdata[2]), dtype=dataclass)  # Load as numpy array
     return array
