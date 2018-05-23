@@ -55,6 +55,10 @@ for path in imgsetpaths:                # Iterate over paths in tile folder
         ### Construct scoremask
         continue
 
+    # Create folder for image set
+    destpath = join(paths['kelvinsset'], 'imgset{:02}'.format(p))
+    ensure_folders_if(destpath)
+
     bicubic_scores = []
 
     f = 0
@@ -62,8 +66,6 @@ for path in imgsetpaths:                # Iterate over paths in tile folder
 
         # Copy image file
         src = join(path, fsmall)
-        destpath = join(paths['kelvinsset'], 'imgset{:02}'.format(p))
-        ensure_folders_if(destpath)
         copyfile(src, join(destpath, 'LR{:02}.png'.format(f)))
         copyfile(qmaskpath(src), join(destpath, 'QM{:02}.png'.format(f)))
 
@@ -84,11 +86,14 @@ for path in imgsetpaths:                # Iterate over paths in tile folder
 
         f += 1
 
-    # Compute median of bicubic interpolations
+    # Compute median of bicubic interpolations, write to file
     bicubic_median_score = np.median(bicubic_scores)
+    with open(join(destpath, buildcfg['normfilename']), 'w') as normfile:
+        normfile.write('{}'.format(bicubic_median_score))
 
     # === To Do: === #
-    # Write median of bicubic interpolation scores to textfile
+    # Choose best HR file
+    # Copy HR file
     # Mask morphological erosion
     # Check mask coverage..?
 

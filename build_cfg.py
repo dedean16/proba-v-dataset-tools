@@ -4,3 +4,4 @@
 buildcfg = {}
 
 buildcfg['nmin'] = 12
+buildcfg['normfilename'] = 'norm.txt'
