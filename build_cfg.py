@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
+"""Configuration of builddataset."""
 
 buildcfg = {}
 
-buildcfg['nmin'] = 10
-buildcfg['dir'] = '/kelvinsset'
+buildcfg['nmin'] = 12

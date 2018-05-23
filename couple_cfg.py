@@ -22,7 +22,7 @@ couplecfg['normdir'] = '/norm'      # Subfolder name for normalized images
 couplecfg['origdir'] = '/orig'      # Subfolder name for original images
 
 # Minimum fraction of clear pixels (no clouds, ice, etc...)
-couplecfg['min_clearance'] = 0.8
+couplecfg['min_clearance'] = 0.60
 
 
 # === Checks === #
