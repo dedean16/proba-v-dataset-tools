@@ -20,7 +20,9 @@ from custom_functions import ensure_folders_if
 def qmaskpath(path):
     """Construct QMASK tiles path from channel tiles path."""
     qmpath = path
-    for ch in couplecfg['channels']:
+    channels = couplecfg['channels']
+    channels.append('ndvi')
+    for ch in channels:
         qmpath = qmpath.replace('_'+ch, '_'+couplecfg['qmaskname'])
 
     if qmpath == path:
@@ -80,7 +82,7 @@ for path in imgsetpaths:                # Iterate over paths in tile folder
     # Find best HR and copy it over to new destination
     fpHR = find_best_HR(fpHRs, fpLRs)
     HR = readgreypng(fpHR)
-    # copyfile(, join(destpath, 'HR.png'))
+    copyfile(fpHR, join(destpath, 'HR.png'))
 
     bicubic_scores = []             # Will hold scores of bicubic upscaled imgs
 
