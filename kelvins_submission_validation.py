@@ -121,3 +121,5 @@ def validate(file):
                                      Required resolution: {}'
                                      .format(img.shape, SRfname, shape))
 
+
+    score(file)  ### should be removed
