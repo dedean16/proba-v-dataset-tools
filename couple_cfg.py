@@ -3,8 +3,9 @@
 
 couplecfg = {}
 
-couplecfg['chunksizeLR'] = 256      # Chunksize for LR (300m) images in pixels
+couplecfg['chunksizeLR'] = 128      # Chunksize for LR (300m) images in pixels
 couplecfg['scaleHR'] = 3            # Scale of HR/LR
+couplecfg['valuebitshift'] = 4      # Bit shift of values, for nicer viewing
 
 # Number of image tiles to extract from location
 couplecfg['ntilesx'] = 3            # x direction
@@ -16,7 +17,7 @@ couplecfg['qualitychannel'] = '/QUALITY/SM'
 couplecfg['qmaskname'] = 'QMASK'
 
 # Subfolder names and writing flags
-couplecfg['norm'] = True            # Write normalized image
+couplecfg['norm'] = False           # Write normalized image
 couplecfg['orig'] = True            # Write original image
 couplecfg['normdir'] = '/norm'      # Subfolder name for normalized images
 couplecfg['origdir'] = '/orig'      # Subfolder name for original images

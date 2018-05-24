@@ -27,7 +27,9 @@ def couple_writer(tile, hdfcnt, jx, jy, ch, level, coord,
                   filepath, targetpath, dtype):
     """Write array to image file, in tiles directory structure."""
     isbool = (dtype == 'bool')          # Is image of datatype boolean
-    utile = tile.astype(dtype)          # Convert image to uint16 or boolean
+
+    # Bitshift values; these are generally quite low, much lower than 2^16
+    utile = (tile << couplecfg['valuebitshift']).astype(dtype)
 
     if not(isbool):                     # Normalize 16-bit images
         utilenorm = (utile * (2**16 / np.max(utile))).astype('uint16')
@@ -55,7 +57,7 @@ def couple_writer(tile, hdfcnt, jx, jy, ch, level, coord,
     ensure_folders_if(pathstrorig, couplecfg['orig'])
     ensure_folders_if(pathstrnorm, couplecfg['norm'] and not isbool)
 
-    #=== Write images ===#
+    # === Write images === #
     if isbool:                          # Write boolean image (quality mask)
         writegreypng(utile, filepathstrorig)
     else:
