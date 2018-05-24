@@ -29,13 +29,31 @@ def qmaskpath(path):
     return qmpath
 
 
+def find_best_HR(fpHRs, fpLRs):
+    """
+    Determine and return HR to use, by comparing downscaled HRs with LRs.
+
+    fpHRs -- list of filepaths of HR images
+    fpLRs -- list of filepaths of LR images
+    """
+    HRLRdiffs = np.zeros((len(fpHRs), len(fpLRs)))
+    for h in range(len(fpHRs)):                     # Iterate over HR filepaths
+        for l in range(len(fpLRs)):                 # Iterate over LR filepaths
+            LR = readgreypng(fpLRs[l])
+            HR = readgreypng(fpHRs[h])
+            HRsmall = transform.downscale_local_mean(HR, (3, 3))
+            HRLRdiffs[h, l] = RMSE(HRsmall, LR)     # Difference of LR with HR
+
+    hmindiff = HRLRdiffs.mean(1).argmin()           # Index of HR with min diff
+    return fpHRs[hmindiff]                          # Return HR with min diff
+
+
 # Construct list of processed PNG files (full paths)
 pattern = join(paths['tiles'], '**{0}/'.format(couplecfg['origdir']))
 imgsetpaths = glob(pattern, recursive=True)
 
 print('Selection criteria:\n'
       + 'Minimum LR images per set: {}'.format(buildcfg['nmin']))
-
 npaths = len(imgsetpaths)
 bar = IncrementalBar('Processing files... ETA: %(eta)ds', max=npaths, width=25)
 
@@ -43,11 +61,11 @@ p = 0
 for path in imgsetpaths:                # Iterate over paths in tile folder
     bar.next()
 
-    fsmalls = glob(path+'*_333M_*')
-    flarges = glob(path+'*_100M_*')
+    fpLRs = glob(path+'*_333M_*')
+    fpHRs = glob(path+'*_100M_*')
 
     # Filter image sets on minimum amount small and big images
-    if len(fsmalls) < buildcfg['nmin'] or len(flarges) == 0:
+    if len(fpLRs) < buildcfg['nmin'] or len(fpHRs) == 0:
         continue
 
     # Skip Quality Mask images
@@ -59,25 +77,28 @@ for path in imgsetpaths:                # Iterate over paths in tile folder
     destpath = join(paths['kelvinsset'], 'imgset{:02}'.format(p))
     ensure_folders_if(destpath)
 
-    bicubic_scores = []
+    # Find best HR and copy it over to new destination
+    fpHR = find_best_HR(fpHRs, fpLRs)
+    HR = readgreypng(fpHR)
+    # copyfile(, join(destpath, 'HR.png'))
+
+    bicubic_scores = []             # Will hold scores of bicubic upscaled imgs
 
     f = 0
-    for fsmall in fsmalls:          # Iterate over LR tiles
+    for fpLR in fpLRs:              # Iterate over LR tiles
 
-        # Copy image file
-        src = join(path, fsmall)
-        copyfile(src, join(destpath, 'LR{:02}.png'.format(f)))
-        copyfile(qmaskpath(src), join(destpath, 'QM{:02}.png'.format(f)))
+        # Copy LR and QM image files
+        copyfile(fpLR, join(destpath, 'LR{:02}.png'.format(f)))
+        copyfile(qmaskpath(fpLR), join(destpath, 'QM{:02}.png'.format(f)))
 
         # Compute bicubic interpolation
-        HR = readgreypng(flarges[0])  ### Choose best?
-        LR = readgreypng(fsmall)
+        LR = readgreypng(fpLR)
         bicubic = transform.rescale(LR, scale=3, order=3, mode='edge')
 
         # Check if shapes (image resolutions) are matching
         if bicubic.shape != HR.shape:
             raise ValueError('Shape not matching: {} and {}.\nFile: {}'
-                             .format(bicubic.shape, HR.shape, fsmall))
+                             .format(bicubic.shape, HR.shape, fpLR))
             continue
 
         # Compute score of bicubic interpolation
@@ -87,13 +108,10 @@ for path in imgsetpaths:                # Iterate over paths in tile folder
         f += 1
 
     # Compute median of bicubic interpolations, write to file
-    bicubic_median_score = np.median(bicubic_scores)
     with open(join(destpath, buildcfg['normfilename']), 'w') as normfile:
-        normfile.write('{}'.format(bicubic_median_score))
+        normfile.write('{}'.format(np.median(bicubic_scores)))
 
     # === To Do: === #
-    # Choose best HR file
-    # Copy HR file
     # Mask morphological erosion
     # Check mask coverage..?
 
