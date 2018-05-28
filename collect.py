@@ -5,6 +5,9 @@ from paths import paths
 from collect_credentials import cfg
 from collect_wgetthread import wgetthread, wgetstatus
 
+
+print('\n=== COLLECT ===')
+
 # Initialise thread collection
 threads = []
 

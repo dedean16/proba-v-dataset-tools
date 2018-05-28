@@ -84,4 +84,5 @@ def compute_ndvi_tiles():
 
 # If this file is executed as a script
 if __name__ == '__main__':
+    print('\n=== NDVI ===')
     compute_ndvi_tiles()

@@ -50,6 +50,8 @@ def find_best_HR(fpHRs, fpLRs):
     return fpHRs[hmindiff]                          # Return HR with min diff
 
 
+print('\n=== BUILD DATASET ===')
+
 # Construct list of processed PNG files (full paths)
 pattern = join(paths['tiles'], '**{0}/'.format(couplecfg['origdir']))
 imgsetpaths = glob(pattern, recursive=True)

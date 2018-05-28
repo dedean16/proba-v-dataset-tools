@@ -19,6 +19,9 @@ with warnings.catch_warnings():
     warnings.simplefilter('ignore')
     import h5py
 
+
+print('\n=== COUPLE ===')
+
 # Get list of all files for all coords
 CC, nfiles = couplepaths(coords, mapcfg)
 

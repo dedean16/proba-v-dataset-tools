@@ -11,6 +11,8 @@ from collect_credentials import cfg
 from collect_wgetthread import wgetstatus, wgetthread
 
 
+print('\n=== COUPLE COLLECT ===')
+
 # Construct list of processed PNG files (full paths)
 pattern = join(paths['tiles'], '**/*.png')
 filepaths = glob.glob(pattern, recursive=True)

@@ -21,6 +21,8 @@ def checkitems(f):
             checkitems(f[key])
 
 
+print('\n=== PURGE DATABASE ===')
+
 # Parse optional argument '-v' for verbose output
 verbose = False
 if len(sys.argv) > 1:
