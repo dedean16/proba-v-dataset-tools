@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
+"""Collect HDF5 files from the PROBA-V products host server."""
 
-from paths import *
-from collect_cfg import *
-from collect_credentials import *
-from collect_wgetthread import *
+from paths import paths
+from collect_credentials import cfg
+from collect_wgetthread import wgetthread, wgetstatus
 
 # Initialise thread collection
 threads = []
