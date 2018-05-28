@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build dataset from coupled tiles."""
 
-from os.path import join
+from os.path import join, relpath
 from glob import glob
 from shutil import copyfile
 
@@ -61,65 +61,73 @@ print('Selection criteria:\n'
 npaths = len(imgsetpaths)
 bar = IncrementalBar('Processing files... ETA: %(eta)ds', max=npaths, width=25)
 
-p = 0
-for path in imgsetpaths:                # Iterate over paths in tile folder
-    bar.next()
+pathsourcelist = join(paths['kelvinsset'], buildcfg['sources'])
+with open(pathsourcelist, 'w') as fsourcelist:
 
-    fpLRs = glob(path+'*_333M_*')
-    fpHRs = glob(path+'*_100M_*')
+    p = 0
+    for path in imgsetpaths:                # Iterate over paths in tile folder
+        bar.next()
 
-    # Filter image sets on minimum amount small and big images
-    if len(fpLRs) < buildcfg['nmin'] or len(fpHRs) == 0:
-        continue
+        fpLRs = glob(path+'*_333M_*')
+        fpHRs = glob(path+'*_100M_*')
 
-    # Skip Quality Mask images
-    if couplecfg['qmaskname'] in path:
-        ### Construct scoremask
-        continue
-
-    # Create folder for image set
-    destpath = join(paths['kelvinsset'], 'imgset{:02}'.format(p))
-    ensure_folders_if(destpath)
-
-    # Find best HR and copy it over to new destination
-    fpHR = find_best_HR(fpHRs, fpLRs)
-    HR = readgreypng(fpHR)
-    copyfile(fpHR, join(destpath, 'HR.png'))
-
-    bicubic_scores = []             # Will hold scores of bicubic upscaled imgs
-
-    f = 0
-    for fpLR in fpLRs:              # Iterate over LR tiles
-
-        # Copy LR and QM image files
-        copyfile(fpLR, join(destpath, 'LR{:02}.png'.format(f)))
-        copyfile(qmaskpath(fpLR), join(destpath, 'QM{:02}.png'.format(f)))
-
-        # Compute bicubic interpolation
-        LR = readgreypng(fpLR)
-        bicubic = transform.rescale(LR, scale=3, order=3, mode='edge')
-
-        # Check if shapes (image resolutions) are matching
-        if bicubic.shape != HR.shape:
-            raise ValueError('Shape not matching: {} and {}.\nFile: {}'
-                             .format(bicubic.shape, HR.shape, fpLR))
+        # Filter image sets on minimum amount small and big images
+        if len(fpLRs) < buildcfg['nmin'] or len(fpHRs) == 0:
             continue
 
-        # Compute score of bicubic interpolation
-        score = RMSE(bicubic, HR)
-        bicubic_scores.append(score)
+        # Skip Quality Mask images
+        if couplecfg['qmaskname'] in path:
+            ### Construct scoremask
+            continue
 
-        f += 1
+        # Create folder for image set
+        destpath = join(paths['kelvinsset'], 'imgset{:02}'.format(p))
+        ensure_folders_if(destpath)
 
-    # Compute median of bicubic interpolations, write to file
-    with open(join(destpath, buildcfg['normfilename']), 'w') as normfile:
-        normfile.write('{}'.format(np.median(bicubic_scores)))
+        # Find best HR and copy it over to new destination
+        fpHR = find_best_HR(fpHRs, fpLRs)
+        HR = readgreypng(fpHR)
+        copyfile(fpHR, join(destpath, 'HR.png'))
 
-    # === To Do: === #
-    # Mask morphological erosion
-    # Check mask coverage..?
+        bicubic_scores = []         # Will hold scores of bicubic upscaled imgs
 
-    p += 1
+        f = 0
+        for fpLR in fpLRs:          # Iterate over LR tiles
+
+            # Copy LR and QM image files
+            copyfile(fpLR, join(destpath, 'LR{:02}.png'.format(f)))
+            copyfile(qmaskpath(fpLR), join(destpath, 'QM{:02}.png'.format(f)))
+
+            # Compute bicubic interpolation
+            LR = readgreypng(fpLR)
+            bicubic = transform.rescale(LR, scale=3, order=3, mode='edge')
+
+            # Check if shapes (image resolutions) are matching
+            if bicubic.shape != HR.shape:
+                raise ValueError('Shape not matching: {} and {}.\nFile: {}'
+                                 .format(bicubic.shape, HR.shape, fpLR))
+                continue
+
+            # Compute score of bicubic interpolation
+            score = RMSE(bicubic, HR)
+            bicubic_scores.append(score)
+
+            f += 1
+
+        # Compute median of bicubic interpolations, write to file
+        with open(join(destpath, buildcfg['normfilename']), 'w') as normfile:
+            normfile.write('{}'.format(np.median(bicubic_scores)))
+
+        # Write list of source files
+        sourcepath = relpath(path, start=paths['tiles'])
+        fsourcelist.write('imgset{:02} : {}\n'.format(p, sourcepath))
+
+        # === To Do: === #
+        # Mask morphological erosion
+        # Check mask coverage..?
+
+        p += 1
+
 
 bar.finish()
 print('Copied {} image sets.'.format(p))
