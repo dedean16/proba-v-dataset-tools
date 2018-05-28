@@ -8,8 +8,8 @@ couplecfg['scaleHR'] = 3            # Scale of HR/LR
 couplecfg['valuebitshift'] = 4      # Bit shift of values, for nicer viewing
 
 # Number of image tiles to extract from location
-couplecfg['ntilesx'] = 3            # x direction
-couplecfg['ntilesy'] = 3            # y direction
+couplecfg['ntilesx'] = 4            # x direction
+couplecfg['ntilesy'] = 4            # y direction
 
 # Color channels to export
 couplecfg['channels'] = ['NIR', 'RED', 'BLUE', 'SWIR']
