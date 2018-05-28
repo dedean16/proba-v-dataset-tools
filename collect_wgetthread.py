@@ -43,7 +43,6 @@ class wgetthread(Thread):
         filesdone = self.filesdone
 
         year = cfg['year']
-        month = cfg['month']
         ROI = cfg['ROI']
         baseurl = cfg['baseurl']
         username = cfg['username']
@@ -51,16 +50,17 @@ class wgetthread(Thread):
         wgetpath = paths['wget']
         datapath = paths['data']
 
-        # Construct URL
-        url = baseurl + product + str(year) + '/' + str(month)\
-            + '/?coord=' + coordstr(ROI)
-
         sleep(0.3)  # Give wgetstatus some time to calculate data folder size
 
-        # Fetch data using wget
-        call([wgetpath, '-r', '--user=' + username, '--password=' + password,
-              '-P' + datapath, '-nH', '-q',
-              '--reject=*.html*,*.tif,*.tiff,*.png,*.pdf'+filesdone,  url])
+        for month in cfg['months']:
+            # Construct URL
+            url = baseurl + product + str(year) + '/' + str(month)\
+                + '/?coord=' + coordstr(ROI)
+
+            # Fetch data using wget
+            call([wgetpath, '-r', '--user='+username, '--password='+password,
+                  '-P'+datapath, '-nH', '-q',
+                  '--reject=*.html*,*.tif,*.tiff,*.png,*.pdf'+filesdone,  url])
 
 
 # Threaded status terminal output

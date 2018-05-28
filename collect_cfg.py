@@ -6,7 +6,7 @@ cfg = {}
 
 # Define date of interest
 cfg['year'] = 2017                  # Year of interest
-cfg['month'] = 8                    # Month of interest
+cfg['months'] = [7, 8, 9]           # Month of interest
 
 # Define Region of Interest Coordinates
 ROI = {}
