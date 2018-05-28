@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""List of coordinates that will be downloaded by couple_collect.py."""
 
 # Coordinate list for the high/low-res Coupler
 

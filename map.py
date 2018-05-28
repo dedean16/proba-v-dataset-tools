@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""
+Create earth map of database contents.
+
+Writes layer images to /map/img folder. Location of map file: /map/map.html.
+"""
+
 import os
 import numpy as np
 

@@ -3,5 +3,5 @@
 
 buildcfg = {}
 
-buildcfg['nmin'] = 12
-buildcfg['normfilename'] = 'norm.txt'
+buildcfg['nmin'] = 12                   # Minimum number of images per set
+buildcfg['normfilename'] = 'norm.txt'   # Name of the file containing the norm
