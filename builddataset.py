@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """Build dataset from coupled tiles."""
 
-from os.path import join, relpath
+from os.path import join, relpath, isfile
 from glob import glob
 from shutil import copyfile
 
 from progress.bar import IncrementalBar
-from skimage import transform
+from skimage.transform import downscale_local_mean, rescale
 import numpy as np
 
 from paths import paths
 from couple_cfg import couplecfg
 from build_cfg import buildcfg
-from pngtools import readgreypng
+from pngtools import readgreypng, writegreypng
 from extra_math import RMSE
 from custom_functions import ensure_folders_if
 
@@ -43,7 +43,7 @@ def find_best_HR(fpHRs, fpLRs):
         for l in range(len(fpLRs)):                 # Iterate over LR filepaths
             LR = readgreypng(fpLRs[l])
             HR = readgreypng(fpHRs[h])
-            HRsmall = transform.downscale_local_mean(HR, (3, 3))
+            HRsmall = downscale_local_mean(HR, (3, 3))
             HRLRdiffs[h, l] = RMSE(HRsmall, LR)     # Difference of LR with HR
 
     hmindiff = HRLRdiffs.mean(1).argmin()           # Index of HR with min diff
@@ -56,11 +56,14 @@ print('\n=== BUILD DATASET ===')
 pattern = join(paths['tiles'], '**{0}/'.format(couplecfg['origdir']))
 imgsetpaths = glob(pattern, recursive=True)
 
+# Prepare terminal output
 print('Selection criteria:\n'
-      + 'Minimum LR images per set: {}'.format(buildcfg['nmin']))
+      + 'Minimum LR images per set: {}\nMinimum clear pixel coverage: {}'
+      .format(buildcfg['nmin'], buildcfg['min_clearance']))
 npaths = len(imgsetpaths)
 bar = IncrementalBar('Processing files... ETA: %(eta)ds', max=npaths, width=25)
 
+# Open source list file
 pathsourcelist = join(paths['kelvinsset'], buildcfg['sources'])
 with open(pathsourcelist, 'w') as fsourcelist:
 
@@ -71,23 +74,45 @@ with open(pathsourcelist, 'w') as fsourcelist:
         fpLRs = glob(path+'*_333M_*')
         fpHRs = glob(path+'*_100M_*')
 
-        # Filter image sets on minimum amount small and big images
+        # Reject image set if not enough small and big images
         if len(fpLRs) < buildcfg['nmin'] or len(fpHRs) == 0:
             continue
 
         # Skip Quality Mask images
         if couplecfg['qmaskname'] in path:
-            ### Construct scoremask
             continue
 
-        # Create folder for image set
-        destpath = join(paths['kelvinsset'], 'imgset{:02}'.format(p))
-        ensure_folders_if(destpath)
-
-        # Find best HR and copy it over to new destination
+        # Find best HR
         fpHR = find_best_HR(fpHRs, fpLRs)
         HR = readgreypng(fpHR)
+
+        # Make small HR Quality Mask
+        destpath = join(paths['kelvinsset'], 'imgset{:02}'.format(p))
+        QMHR = readgreypng(qmaskpath(fpHR))
+        QMHRsmall = 1.0 == downscale_local_mean(QMHR, (3, 3))
+
+        # Create Source Mask
+        # Note: The Source Mask represents all pixels that can in principle
+        #       be resolved with SR and checked against the HR; i.e. there
+        #       should be at least one LR where this pixel is 'good' and it
+        #       should be good in the HR image.
+        SMsmall = np.full(QMHRsmall.shape, True)
+        for fpLR in fpLRs:                          # Iterate over LRs
+            QMLR = readgreypng(qmaskpath(fpLR))     # Read corresponding QM
+            SMsmall |= QMLR                         # Perform bitwise Or
+        SMsmall &= QMHRsmall                        # Bitwise And with QMHR
+
+        # Reject image sets if not enough clear pixels (Score Mask)
+        if SMsmall.sum() / SMsmall.size < buildcfg['min_clearance']:
+            continue
+
+        # Create folder for image set, copy best HR image
+        ensure_folders_if(destpath)
         copyfile(fpHR, join(destpath, 'HR.png'))
+
+        # Create Score Mask and write it to file
+        SMlarge = 1.0 == rescale(SMsmall, scale=3, order=0, mode='edge')
+        writegreypng(SMlarge, join(destpath, 'scoremask.png'))  # Score Mask
 
         bicubic_scores = []         # Will hold scores of bicubic upscaled imgs
 
@@ -100,7 +125,7 @@ with open(pathsourcelist, 'w') as fsourcelist:
 
             # Compute bicubic interpolation
             LR = readgreypng(fpLR)
-            bicubic = transform.rescale(LR, scale=3, order=3, mode='edge')
+            bicubic = rescale(LR, scale=3, order=3, mode='edge')
 
             # Check if shapes (image resolutions) are matching
             if bicubic.shape != HR.shape:
