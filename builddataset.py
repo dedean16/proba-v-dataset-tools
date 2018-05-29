@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build dataset from coupled tiles."""
 
-from os.path import join, relpath, isfile
+from os.path import join, relpath, splitext, basename
 from glob import glob
 from shutil import copyfile
 
@@ -29,6 +29,22 @@ def qmaskpath(path):
         raise ValueError('No channel name found in path:\n{}'.format(path))
 
     return qmpath
+
+
+def include_in_validate(filepath, p):
+    """
+    Copy file to validation folder. Also constructs the new filename.
+
+    Note: This function relies on the variables paths and buildcfg.
+          Also, the validation folder must already exist.
+    filepath -- Filepath of the file to be copied.
+    folderkey -- buildcfg key for subfolder name
+    p -- Image set index.
+    """
+    path_validate = join(paths['kelvinsset'], buildcfg['dirvalidate'])
+    filename, ext = splitext(basename(filepath))
+    val_destpath = join(path_validate, '{}set{:02}{}'.format(filename, p, ext))
+    copyfile(filepath, val_destpath)
 
 
 def find_best_HR(fpHRs, fpLRs):
@@ -63,6 +79,10 @@ print('Selection criteria:\n'
 npaths = len(imgsetpaths)
 bar = IncrementalBar('Processing files... ETA: %(eta)ds', max=npaths, width=25)
 
+# Create folder for validation set
+ensure_folders_if(join(paths['kelvinsset'], buildcfg['dirvalidate']))
+ensure_folders_if(join(paths['kelvinsset'], buildcfg['dirsubtest']))
+
 # Open source list file
 pathsourcelist = join(paths['kelvinsset'], buildcfg['sources'])
 with open(pathsourcelist, 'w') as fsourcelist:
@@ -87,7 +107,7 @@ with open(pathsourcelist, 'w') as fsourcelist:
         HR = readgreypng(fpHR)
 
         # Make small HR Quality Mask
-        destpath = join(paths['kelvinsset'], 'imgset{:02}'.format(p))
+        setpath = join(paths['kelvinsset'], 'imgset{:02}'.format(p))
         QMHR = readgreypng(qmaskpath(fpHR))
         QMHRsmall = 1.0 == downscale_local_mean(QMHR, (3, 3))
 
@@ -106,13 +126,27 @@ with open(pathsourcelist, 'w') as fsourcelist:
         if SMsmall.sum() / SMsmall.size < buildcfg['min_clearance']:
             continue
 
-        # Create folder for image set, copy best HR image
-        ensure_folders_if(destpath)
-        copyfile(fpHR, join(destpath, 'HR.png'))
+        ensure_folders_if(setpath)         # Create folder for image set
+
+        # Copy best HR image to dataset/validate
+        destHRpath = join(setpath, buildcfg['HRname']+'.png')
+        copyfile(fpHR, destHRpath)
+        # copyfile(fpHR, join(path_validate, 'imgset{:02}HR.png'.format(p)))
+        include_in_validate(destHRpath, p)
 
         # Create Score Mask and write it to file
         SMlarge = 1.0 == rescale(SMsmall, scale=3, order=0, mode='edge')
-        writegreypng(SMlarge, join(destpath, 'scoremask.png'))  # Score Mask
+        path_SM = join(setpath, buildcfg['scoremaskname']+'.png')
+        writegreypng(SMlarge, path_SM)  # Score Mask
+        include_in_validate(path_SM, p)
+
+        # Create submission-test: noised HRs as fake SR submissions
+        path_subtest = join(paths['kelvinsset'], buildcfg['dirsubtest'],
+                            '{}set{:02}.png'.format(buildcfg['SRname'], p))
+        noisescale = HR.mean() * buildcfg['subtestnoise']
+        fakeSR = HR + np.random.normal(scale=noisescale,
+                                       size=HR.shape).astype('uint16')
+        writegreypng(fakeSR, path_subtest)
 
         bicubic_scores = []         # Will hold scores of bicubic upscaled imgs
 
@@ -120,8 +154,8 @@ with open(pathsourcelist, 'w') as fsourcelist:
         for fpLR in fpLRs:          # Iterate over LR tiles
 
             # Copy LR and QM image files
-            copyfile(fpLR, join(destpath, 'LR{:02}.png'.format(f)))
-            copyfile(qmaskpath(fpLR), join(destpath, 'QM{:02}.png'.format(f)))
+            copyfile(fpLR, join(setpath, 'LR{:02}.png'.format(f)))
+            copyfile(qmaskpath(fpLR), join(setpath, 'QM{:02}.png'.format(f)))
 
             # Compute bicubic interpolation
             LR = readgreypng(fpLR)
@@ -140,8 +174,10 @@ with open(pathsourcelist, 'w') as fsourcelist:
             f += 1
 
         # Compute median of bicubic interpolations, write to file
-        with open(join(destpath, buildcfg['normfilename']), 'w') as normfile:
+        path_norm = join(setpath, buildcfg['normfilename']+'.txt')
+        with open(path_norm, 'w') as normfile:
             normfile.write('{}'.format(np.median(bicubic_scores)))
+        include_in_validate(path_norm, p)
 
         # Write list of source files
         sourcepath = relpath(path, start=paths['tiles'])
