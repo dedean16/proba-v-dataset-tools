@@ -7,36 +7,81 @@ score -- Compute total Kelvins score from zipfile submission.
 validate -- Validate submitted zipfile.
 """
 
-import os
+from os.path import split, join
 from zipfile import ZipFile
 
+import png
 import numpy as np
 
-from extra_math import RMSE
-from pngtools import readgreypng
+
+# === PNG READER STUFF === #
+type2depth = {      # Dictionary for datatype (str) to bitdepth
+    'bool': 1,
+    'uint8': 8,
+    'uint16': 16,
+}
+
+
+depth2type = {      # Dictionary for bitdepth to datatype (str)
+    1: 'bool',
+    8: 'uint8',
+    16: 'uint16',
+}
+
+
+# Read greyscale PNG image
+def readgreypng(path):
+    """Read greyscale PNG to numpy array. Accepts 1-, 8- and 16-bit."""
+    # Read data, determine bitdepth and datatype
+    pngdata = png.Reader(path).read()               # Read PNG data
+    bitdepth = pngdata[3]['bitdepth']               # Get bitdepth
+    dataclass = getattr(np, depth2type[bitdepth])   # Get dataclass
+
+    if not pngdata[3]['greyscale']:
+        raise ValueError('Not a greyscale image.')
+
+    # Check for valid bitdepth
+    if bitdepth not in depth2type:
+        raise ValueError('Accepted bit depths: {}. Given: {}'.format(
+                            list(depth2type.keys()), bitdepth))
+
+    array = np.array(list(pngdata[2]), dtype=dataclass)  # Load as numpy array
+    return array
+
+
+def RMSE(SR, HR):
+    """Compute Root Mean Square of Errors."""
+    sqerr = np.square(np.float64(SR) - np.float64(HR))
+    return np.sqrt(sqerr.mean())
+
 
 # === Parameters === #
 shape = (768, 768)
 dtype = 'uint16'
 
 N = 3
-prefix = 'imgset'
-SRsuffix = 'SR.png'
-HRsuffix = 'HR.png'
+suffix = ''
+SRprefix = 'SR'
+HRprefix = 'HR'
+ext = '.png'
+
+validatezipname = 'validate.zip'
 
 
 # === Constructed values === #
-dirpath, filename = os.path.split(__file__)
-HRpath = dirpath.replace('/uploads/competitions/',
-                         '/uploads/media/competitions/') + '/'
+dirpath, filename = split(__file__)
+# HRpath = dirpath.replace('/uploads/competitions/',
+#                          '/uploads/media/competitions/') + '/'
+validatezip = join(dirpath.replace('/uploads/competitions/',
+                         '/uploads/media/competitions/'), validatezipname)
 
 
 # === Functions === #
 
-def fnamelist(path, prefix, N, suffix):
+def fnamelist(path, prefix, N, suffix, ext):
     """Create list of filenames, required for Kelvins submission. (Max: 99)."""
-    fnamefunc = lambda x: '{}{}{:02}{}'.format(path, prefix, x, suffix)
-    return list(map(fnamefunc, range(1, N+1)))
+    fnamer = lambda x: '{}{}set{:02}{}{}'.format(path, prefix, x, suffix, ext)
+    return list(map(fnamer, range(1, N+1)))
 
 
 def scoreterm(SR, HR):
@@ -46,10 +91,11 @@ def scoreterm(SR, HR):
 
 
 # This return the score for the leaderboard
-# if there is an error an exception must be thrown here, but will not be visible to the user. Instead
-# the submission will be marked invalid and a generic error communicated to the user via the web page.
-# May return a single score or a 2 element tuple. In
-# which case the first element is the score and the second the extra_info on the leaderboard
+# if there is an error an exception must be thrown here, but will not be
+# visible to the user. Instead the submission will be marked invalid and a
+# generic error communicated to the user via the web page. May return a single
+# score or a 2 element tuple. In which case the first element is the score and
+# the second the extra_info on the leaderboard
 def score(file):
     u"""
     Compute total Kelvins score from zipfile submission.
@@ -59,16 +105,16 @@ def score(file):
     singlescores = [0]*N
 
     # Open file as ZipFile
-    with ZipFile(file, 'r') as zf:
+    with ZipFile(file, 'r') as zf, ZipFile(validatezip, 'r') as vzf:
 
-        HRfpaths = fnamelist(HRpath, prefix, N, HRsuffix)
-        SRfnames = fnamelist('',     prefix, N, SRsuffix)
+        fHRs = fnamelist('', HRprefix, N, suffix, ext)
+        fSRs = fnamelist('', SRprefix, N, suffix, ext)
 
         for i in range(N):                  # Iterate over images
             # Open HR image and SR image
-            with open(HRfpaths[i], 'rb') as HRf, zf.open(SRfnames[i]) as SRf:
-                HRimg = readgreypng(HRf)
-                SRimg = readgreypng(SRf)
+            with vzf.open(fHRs[i]) as fHR, zf.open(fSRs[i]) as fSR:
+                HRimg = readgreypng(fHR)
+                SRimg = readgreypng(fSR)
 
                 # Calculate scoresum term
                 singlescores[i] = scoreterm(HRimg, SRimg)
@@ -78,9 +124,10 @@ def score(file):
     return totscore, 'extra_info'
 
 
-# This runs immmediately after the upload and validates the easy bits (format size etc.)
-# if succesfull (no exception) score will be run later (by celery)
-# otherwise the text of the exception is shown on the web site (the user sees it) TEST IT PROPERLY
+# This runs immmediately after the upload and validates the easy bits (format
+# size etc.) if succesfull (no exception) score will be run later (by celery)
+# otherwise the text of the exception is shown on the web site (the user sees
+# it) TEST IT PROPERLY
 def validate(file):
     """
     Validate submitted zipfile.
@@ -97,7 +144,7 @@ def validate(file):
 
         # Build list of required files. Build list of missing files.
         contents = zf.namelist()
-        imgnames = fnamelist('', prefix, N, SRsuffix)
+        imgnames = fnamelist('', SRprefix, N, suffix, ext)
         imgnamesmissing = list(filter(lambda x: not(x in contents), imgnames))
 
         # Throw error if files are missing.
