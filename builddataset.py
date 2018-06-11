@@ -3,7 +3,7 @@
 
 from os.path import join, relpath, splitext, basename
 from glob import glob
-from shutil import copyfile
+from shutil import copyfile, make_archive
 
 from progress.bar import IncrementalBar
 from skimage.transform import downscale_local_mean, rescale
@@ -135,7 +135,8 @@ with open(pathsourcelist, 'w') as fsourcelist:
         include_in_validate(destHRpath, p)
 
         # Create Score Mask and write it to file
-        SMlarge = 1.0 == rescale(SMsmall, scale=3, order=0, mode='edge')
+        SMlarge = 1.0 == rescale(SMsmall, scale=3, order=0, mode='edge',
+                                 anti_aliasing=False, multichannel=False)
         path_SM = join(setpath, buildcfg['scoremaskname']+'.png')
         writegreypng(SMlarge, path_SM)  # Score Mask
         include_in_validate(path_SM, p)
@@ -143,7 +144,7 @@ with open(pathsourcelist, 'w') as fsourcelist:
         # Create submission-test: noised HRs as fake SR submissions
         path_subtest = join(paths['kelvinsset'], buildcfg['dirsubtest'],
                             '{}set{:02}.png'.format(buildcfg['SRname'], p))
-        noisescale = HR.mean() * buildcfg['subtestnoise']
+        noisescale = buildcfg['subtestnoise']
         fakeSR = HR + np.random.normal(scale=noisescale,
                                        size=HR.shape).astype('uint16')
         writegreypng(fakeSR, path_subtest)
@@ -159,7 +160,8 @@ with open(pathsourcelist, 'w') as fsourcelist:
 
             # Compute bicubic interpolation
             LR = readgreypng(fpLR)
-            bicubic = rescale(LR, scale=3, order=3, mode='edge')
+            bicubic = rescale(LR, scale=3, order=3, mode='edge',
+                              anti_aliasing=False, multichannel=False)
 
             # Check if shapes (image resolutions) are matching
             if bicubic.shape != HR.shape:
@@ -192,3 +194,12 @@ with open(pathsourcelist, 'w') as fsourcelist:
 
 bar.finish()
 print('Copied {} image sets.'.format(p))
+print('\nWriting submission and validation zip files...')
+
+# Copy validation folder and submission-test folder
+make_archive(buildcfg['dirvalidate'], 'zip',
+             join(paths['kelvinsset'], buildcfg['dirvalidate']))
+make_archive(buildcfg['dirsubtest'], 'zip',
+             join(paths['kelvinsset'], buildcfg['dirsubtest']))
+
+print('Done.')
