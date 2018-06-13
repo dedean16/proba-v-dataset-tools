@@ -21,4 +21,4 @@ buildcfg['sources'] = 'sources.txt'   # File name of list of source files
 buildcfg['dirvalidate'] = 'validate'  # Folder name of validation HRs
 buildcfg['dirsubtest'] = 'submission-test'  # Name of submission test folder
 buildcfg['SRname'] = 'SR'             # Name of SR submission-test files
-buildcfg['subtestnoise'] = 25         # standard dev of noise of sub test
+buildcfg['subtestnoise'] = 1000       # standard dev of noise of sub test
