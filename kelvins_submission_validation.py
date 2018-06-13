@@ -56,14 +56,16 @@ def RMSE(SR, HR):
 
 
 # === Parameters === #
-shape = (768, 768)
+shape = (384, 384)
 dtype = 'uint16'
 
 N = 3
 suffix = ''
 SRprefix = 'SR'
 HRprefix = 'HR'
+normprefix = 'norm'
 ext = '.png'
+normext = '.txt'
 
 validatezipname = 'validate.zip'
 
@@ -84,10 +86,9 @@ def fnamelist(path, prefix, N, suffix, ext):
     return list(map(fnamer, range(1, N+1)))
 
 
-def scoreterm(SR, HR):
+def scoreterm(SR, HR, norm):
     """Compute single score term, based on 1 SR and 1 HR image."""
-    ### the 100 needs to be replaced by the average RMSE of bicubic
-    return np.exp(-RMSE(SR, HR) / 100)
+    return np.exp(-RMSE(SR, HR) / norm)
 
 
 # This return the score for the leaderboard
@@ -109,15 +110,23 @@ def score(file):
 
         fHRs = fnamelist('', HRprefix, N, suffix, ext)
         fSRs = fnamelist('', SRprefix, N, suffix, ext)
+        fnorms = fnamelist('', normprefix, N, suffix, normext)
 
         for i in range(N):                  # Iterate over images
             # Open HR image and SR image
-            with vzf.open(fHRs[i]) as fHR, zf.open(fSRs[i]) as fSR:
+            with vzf.open(fHRs[i]) as fHR,\
+                 vzf.open(fnorms[i]) as fnorm,\
+                 zf.open(fSRs[i]) as fSR:
+
                 HRimg = readgreypng(fHR)
                 SRimg = readgreypng(fSR)
+                norm = float(fnorm.read())
+                print('norm:', norm) ###
 
                 # Calculate scoresum term
-                singlescores[i] = scoreterm(HRimg, SRimg)
+                # norm = 100
+                singlescores[i] = scoreterm(HRimg, SRimg, norm)
+                print('score:', singlescores[i]) ###
 
     totscore = np.mean(singlescores)        # Compute total score (mean)
 
