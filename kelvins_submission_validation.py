@@ -49,20 +49,21 @@ def readgreypng(path):
     return array
 
 
-def RMSE(SR, HR):
+def RMSE(SR, HR, SM):
     """Compute Root Mean Square of Errors."""
     sqerr = np.square(np.float64(SR) - np.float64(HR))
-    return np.sqrt(sqerr.mean())
+    return np.sqrt(sqerr[SM].mean())
 
 
 # === Parameters === #
 shape = (384, 384)
 dtype = 'uint16'
+N = 39
 
-N = 3
 suffix = ''
 SRprefix = 'SR'
 HRprefix = 'HR'
+SMprefix = 'SM'
 normprefix = 'norm'
 ext = '.png'
 normext = '.txt'
@@ -86,9 +87,16 @@ def fnamelist(path, prefix, N, suffix, ext):
     return list(map(fnamer, range(1, N+1)))
 
 
-def scoreterm(SR, HR, norm):
-    """Compute single score term, based on 1 SR and 1 HR image."""
-    return np.exp(-RMSE(SR, HR) / norm)
+def scoreterm(SR, HR, SM, norm):
+    """
+    Compute single score term, based on 1 SR and 1 HR image.
+
+    SR -- The Super Resolution resolved image.
+    HR -- The 'ground truth' High Resolution image.
+    SM -- Score Mask. Indicates which pixels will be used in scoring.
+    norm -- Normalization factor for the Root Mean Square Error.
+    """
+    return np.exp(-RMSE(SR, HR, SM) / norm)
 
 
 # This return the score for the leaderboard
@@ -122,11 +130,12 @@ def score(file):
 
                 HRimg = readgreypng(fHR)
                 SRimg = readgreypng(fSR)
+                SMask = readgreypng(fSM)
                 norm = float(fnorm.read())
 
                 # Calculate scoresum term
                 # norm = 100
-                singlescores[i] = scoreterm(HRimg, SRimg, norm)
+                singlescores[i] = scoreterm(HRimg, SRimg, SMask, norm)
 
     totscore = np.mean(singlescores)        # Compute total score (mean)
 
