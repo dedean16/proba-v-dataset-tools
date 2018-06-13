@@ -82,7 +82,7 @@ validatezip = join(dirpath.replace('/uploads/competitions/',
 
 def fnamelist(path, prefix, N, suffix, ext):
     """Create list of filenames, required for Kelvins submission. (Max: 99)."""
-    fnamer = lambda x: '{}{}set{:02}{}{}'.format(path, prefix, x, suffix, ext)
+    fnamer = lambda x: '{}{}set{:03}{}{}'.format(path, prefix, x, suffix, ext)
     return list(map(fnamer, range(1, N+1)))
 
 
@@ -111,22 +111,22 @@ def score(file):
         fHRs = fnamelist('', HRprefix, N, suffix, ext)
         fSRs = fnamelist('', SRprefix, N, suffix, ext)
         fnorms = fnamelist('', normprefix, N, suffix, normext)
+        fSMs = fnamelist('', SMprefix, N, suffix, ext)
 
         for i in range(N):                  # Iterate over images
-            # Open HR image and SR image
+            # Open normalization file,  HR image and SR image
             with vzf.open(fHRs[i]) as fHR,\
                  vzf.open(fnorms[i]) as fnorm,\
+                 vzf.open(fSMs[i]) as fSM,\
                  zf.open(fSRs[i]) as fSR:
 
                 HRimg = readgreypng(fHR)
                 SRimg = readgreypng(fSR)
                 norm = float(fnorm.read())
-                print('norm:', norm) ###
 
                 # Calculate scoresum term
                 # norm = 100
                 singlescores[i] = scoreterm(HRimg, SRimg, norm)
-                print('score:', singlescores[i]) ###
 
     totscore = np.mean(singlescores)        # Compute total score (mean)
 

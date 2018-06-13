@@ -43,7 +43,7 @@ def include_in_validate(filepath, p):
     """
     path_validate = join(paths['kelvinsset'], buildcfg['dirvalidate'])
     filename, ext = splitext(basename(filepath))
-    val_destpath = join(path_validate, '{}set{:02}{}'.format(filename, p, ext))
+    val_destpath = join(path_validate, '{}set{:03}{}'.format(filename, p, ext))
     copyfile(filepath, val_destpath)
 
 
@@ -107,7 +107,7 @@ with open(pathsourcelist, 'w') as fsourcelist:
         HR = readgreypng(fpHR)
 
         # Make small HR Quality Mask
-        setpath = join(paths['kelvinsset'], 'imgset{:02}'.format(p))
+        setpath = join(paths['kelvinsset'], 'imgset{:03}'.format(p))
         QMHR = readgreypng(qmaskpath(fpHR))
         QMHRsmall = 1.0 == downscale_local_mean(QMHR, (3, 3))
 
@@ -131,7 +131,6 @@ with open(pathsourcelist, 'w') as fsourcelist:
         # Copy best HR image to dataset/validate
         destHRpath = join(setpath, buildcfg['HRname']+'.png')
         copyfile(fpHR, destHRpath)
-        # copyfile(fpHR, join(path_validate, 'imgset{:02}HR.png'.format(p)))
         include_in_validate(destHRpath, p)
 
         # Create Score Mask and write it to file
@@ -143,7 +142,7 @@ with open(pathsourcelist, 'w') as fsourcelist:
 
         # Create submission-test: noised HRs as fake SR submissions
         path_subtest = join(paths['kelvinsset'], buildcfg['dirsubtest'],
-                            '{}set{:02}.png'.format(buildcfg['SRname'], p))
+                            '{}set{:03}.png'.format(buildcfg['SRname'], p))
         noisescale = buildcfg['subtestnoise']
         fakeSR = HR + np.random.normal(scale=noisescale,
                                        size=HR.shape).astype('uint16')
@@ -155,8 +154,8 @@ with open(pathsourcelist, 'w') as fsourcelist:
         for fpLR in fpLRs:          # Iterate over LR tiles
 
             # Copy LR and QM image files
-            copyfile(fpLR, join(setpath, 'LR{:02}.png'.format(f)))
-            copyfile(qmaskpath(fpLR), join(setpath, 'QM{:02}.png'.format(f)))
+            copyfile(fpLR, join(setpath, 'LR{:03}.png'.format(f)))
+            copyfile(qmaskpath(fpLR), join(setpath, 'QM{:03}.png'.format(f)))
 
             # Compute bicubic interpolation
             LR = readgreypng(fpLR)
@@ -183,7 +182,7 @@ with open(pathsourcelist, 'w') as fsourcelist:
 
         # Write list of source files
         sourcepath = relpath(path, start=paths['tiles'])
-        fsourcelist.write('imgset{:02} : {}\n'.format(p, sourcepath))
+        fsourcelist.write('imgset{:03} : {}\n'.format(p, sourcepath))
 
         # === To Do: === #
         # Mask morphological erosion
