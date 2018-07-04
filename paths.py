@@ -4,7 +4,7 @@ Holds locations of dedicated folder paths.
 
 Contains location of: data folder, wget executable, tiles folder,
 kelvinspath folder, srresults folder.
-wget exe can be specified per platform.
+wget can be specified per platform.
 """
 from os import path, name
 
@@ -12,16 +12,14 @@ from os import path, name
 paths = {}
 
 # Define relative paths
-# N.B. Relative to proba-v-data-collector.py
+# N.B. Relative to main repo directory
 datarelpath = '/../data'        # Points to data folder
 wgetrelpath = '/../wget/wget'   # Points to wget executable (Windows only)
 tilespath = '/tiles'            # Points to tiles folder
 kelvinspath = '/kelvinsset'     # points to kelvinsset folder
 srresults = '/sr/results'       # Points to SR results folder
 
-# Note: As wget is installed by default on many Linux distros,
-#       it is assumed this command is present. paths.py deals with platform
-#       specific cases such as these.
+# Note: If Linux is used, wget should be in the PATH.
 
 # ============================================================= #
 # Construct common paths
@@ -38,6 +36,6 @@ if name == "nt":
     paths['wget'] = wgetpath
 
 elif name == "posix":
-    # Define relative paths (N.B. Relative to proba-v-data-collector.py)
+    # Define relative paths (N.B. Relative to main repo directory)
     wgetpath = 'wget'                       # Points to wget command in Linux
     paths['wget'] = wgetpath
