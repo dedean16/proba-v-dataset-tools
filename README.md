@@ -25,6 +25,8 @@ PROBA-V Python Data Tool collection for building a dataset for testing Super Res
 8. Use `ndvi.py` to compute and write NDVI images.
 9. Use `builddataset.py` to build the dataset datastructure in the kelvinsset folder.
 
+<img src="./subsystems.svg">
+
 ## Requirements
 - Python 3.5+
 - Python libraries: h5py, numpy, Pillow, PyPNG, scikit-image and progress
